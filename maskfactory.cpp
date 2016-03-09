@@ -1,5 +1,6 @@
 #include "maskfactory.h"
 
+
 MaskFactory::MaskFactory()
 {
 
@@ -31,7 +32,20 @@ Mask MaskFactory::SobelY()
         return result;
 }
 
-//shared_ptr<Mask> MaskFactory::Gauss(float sigma)
-//{
-//
-//}
+Mask MaskFactory::Gauss(float sigma)
+{
+    int half = ceil(3*sigma);
+    int size = 2 * half + 1;
+    float sigma2 = sigma*sigma;
+    Mask result(size,size);
+    for(int i = -half; i <= half; i++)
+        for(int j = -half; j <= half; j++)
+        {
+            float val= pow(M_E,-(i*i+j*j) / (2*sigma2)) / (2* M_PI*sigma2);
+            result.set(i,j,val);
+        }
+    return result;
+
+}
+
+
