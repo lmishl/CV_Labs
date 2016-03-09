@@ -1,9 +1,10 @@
 #include "image.h"
 
-Image::Image(int h, int w) : height(h),width(w)
+Image::Image(int h, int w) :
+    height(h),
+    width(w),
+    image(make_unique<float[]>(h*w))
 {
-    image = make_unique<float[]>(h*w);
-
 }
 
 shared_ptr<Image> Image::fromFile(const QString& fileName)
@@ -126,6 +127,33 @@ shared_ptr<Image> Image::convolution(const Mask& mask,EdgeMode mode) const
             result->setPixel(i,j,sum);
         }
     }
+    return result;
+
+}
+
+shared_ptr<Image> Image::convolution(const Mask& row, const Mask& column, EdgeMode mode) const
+{
+    shared_ptr<Image> result = make_shared<Image>(height, width);
+
+   // int maskSize = row.getWidth();
+   //
+   // for(int i=0; i< height; i++)
+   // {
+   //     for(int j=0; j<width; j++)
+   //     {
+   //         float sum=0;
+   //         for(int i1=0; i1< maskH; i1++)
+   //         {
+   //             for(int j1=0; j1 < maskW; j1++)
+   //             {
+   //                 float iPix = getPixel(i-(i1-maskH/2), j-(j1-maskW/2),mode);
+   //                 float mPix = mask.get(i1,j1);
+   //                 sum += iPix * mPix;
+   //             }
+   //         }
+   //         result->setPixel(i,j,sum);
+   //     }
+   // }
     return result;
 
 }

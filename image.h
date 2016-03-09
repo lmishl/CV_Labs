@@ -1,6 +1,4 @@
-#ifndef IMAGE_H
-#define IMAGE_H
-
+#pragma once
 
 #include <memory>
 #include <limits>
@@ -26,6 +24,7 @@ public:
     static shared_ptr<Image> fromFile(const QString &fileName);
     static shared_ptr<Image> fromQImage(const QImage &picture);
     shared_ptr<Image> convolution(const Mask &mask, EdgeMode mode) const;
+    shared_ptr<Image> convolution(const Mask& row, const Mask& column, EdgeMode mode) const;
 
     QImage toQImage() const;
     bool toFile(const QString &fileName)const;
@@ -40,9 +39,8 @@ public:
 
 
 private:
-    unique_ptr<float[]> image;
+    const unique_ptr<float[]> image;
     const int height;
     const int width;
 };
 
-#endif // IMAGE_H

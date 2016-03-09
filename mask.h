@@ -1,5 +1,4 @@
-#ifndef MASK_H
-#define MASK_H
+#pragma once
 #include <memory>
 #include <QtGlobal>
 using namespace std;
@@ -8,6 +7,7 @@ class Mask
 {
 public:
     Mask(int h, int w);
+    Mask(Mask&& _r);
 
     float get(int i, int j) const;
     void set(int i, int j, float value);
@@ -15,9 +15,7 @@ public:
     int getHeight() const;
     int getWidth() const;
 private:
-    unique_ptr<float[]> kernel;
+    const unique_ptr<float[]> kernel;
     const int height;
     const int width;
 };
-
-#endif // MASK_H

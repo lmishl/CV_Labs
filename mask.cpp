@@ -1,9 +1,18 @@
 #include "mask.h"
 
 
-Mask::Mask(int h, int w): height(h),width(w)
+Mask::Mask(int h, int w):
+    height(h),
+    width(w),
+    kernel(make_unique<float[]>(h*w))
 {
-    kernel = make_unique<float[]>(h*w);
+}
+
+Mask::Mask(Mask&& _r):
+    height(_r.height),
+    width(_r.width),
+    kernel( move(*const_cast<unique_ptr<float[]>*>(&_r.kernel)) )
+{
 }
 
 float Mask::get(int i, int j) const

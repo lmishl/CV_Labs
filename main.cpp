@@ -12,14 +12,14 @@
 #include <maskfactory.h>
 using namespace std;
 
- shared_ptr<Image> Sobel(shared_ptr<Image> im, EdgeMode mode)
+shared_ptr<Image> Sobel(const Image& im, EdgeMode mode)
 {
     MaskFactory factory;
-    shared_ptr<Image> gradX = im->convolution(factory.SobelX(),mode);
-    shared_ptr<Image> gradY = im->convolution(factory.SobelY(),mode);
+    shared_ptr<Image> gradX = im.convolution(factory.SobelX(),mode);
+    shared_ptr<Image> gradY = im.convolution(factory.SobelY(),mode);
 
-    int width = im->getWidth();
-    int height = im->getHeight();
+    int width = im.getWidth();
+    int height = im.getHeight();
     shared_ptr<Image> result = make_shared<Image>(height, width);
 
     for(int i=0; i<height; i++)
@@ -39,7 +39,7 @@ int main()
     QString fileName = "C:\\1\\1.jpg";
     shared_ptr<Image> myIm = Image::fromFile(fileName);
 
-    shared_ptr<Image> res = Sobel(myIm,EdgeMode::ZEROS);
+    shared_ptr<Image> res = Sobel(*myIm,EdgeMode::ZEROS);
     res->toFile("C:\\1\\2n.jpg");
     cout<<"\ngood";
 

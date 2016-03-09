@@ -1,5 +1,4 @@
-#ifndef MASKFACTORY_H
-#define MASKFACTORY_H
+#pragma once
 #include "mask.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -17,4 +16,3 @@ public:
     static pair<Mask,Mask> GaussSeparated(float sigma);
 };
 
-#endif // MASKFACTORY_H
