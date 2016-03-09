@@ -1,18 +1,16 @@
 #include "mask.h"
 
 
-Mask::Mask(int h, int w)
+Mask::Mask(int h, int w): height(h),width(w)
 {
-    this->height = h;
-    this->width = w;
-    core = make_unique<float[]>(h*w);
+    kernel = make_unique<float[]>(h*w);
 }
 
-float Mask::getPixel(int i, int j) const
+float Mask::get(int i, int j) const
 {
     if(i<height && j<width && i>=0 && j>=0)
     {
-        return core[i*width + j];
+        return kernel[i*width + j];
     }
     else
     {
@@ -21,11 +19,11 @@ float Mask::getPixel(int i, int j) const
     }
 }
 
-void Mask::setPixel(int i, int j, float value)
+void Mask::set(int i, int j, float value)
 {
     if(i<height && j<width && i>=0 && j>=0)
     {
-        core[i*width + j] = value;
+        kernel[i*width + j] = value;
     }
     else
     {

@@ -6,8 +6,8 @@ class MaskFactory
 {
 public:
     MaskFactory();
-    shared_ptr<Mask> SobelX();
-    shared_ptr<Mask> SobelY();
+    static Mask SobelX();
+    static Mask SobelY();
 };
 
 #endif // MASKFACTORY_H

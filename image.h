@@ -24,8 +24,8 @@ public:
     Image(int h, int w);
 
     static shared_ptr<Image> fromFile(const QString &fileName);
-    static shared_ptr<Image> fromQImage(QImage picture);
-    shared_ptr<Image> convolution(shared_ptr<Mask> mask, EdgeMode mode);
+    static shared_ptr<Image> fromQImage(const QImage &picture);
+    shared_ptr<Image> convolution(const Mask &mask, EdgeMode mode) const;
 
     QImage toQImage() const;
     bool toFile(const QString &fileName)const;
@@ -41,8 +41,8 @@ public:
 
 private:
     unique_ptr<float[]> image;
-    int height;
-    int width;
+    const int height;
+    const int width;
 };
 
 #endif // IMAGE_H

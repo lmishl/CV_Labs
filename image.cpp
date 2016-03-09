@@ -1,10 +1,9 @@
 #include "image.h"
 
-Image::Image(int h, int w)
+Image::Image(int h, int w) : height(h),width(w)
 {
     image = make_unique<float[]>(h*w);
-    height = h;
-    width = w;
+
 }
 
 shared_ptr<Image> Image::fromFile(const QString& fileName)
@@ -23,15 +22,17 @@ shared_ptr<Image> Image::fromFile(const QString& fileName)
     }
 }
 
-shared_ptr<Image> Image::fromQImage(QImage picture)
+shared_ptr<Image> Image::fromQImage(const QImage& picture)
 {
-    shared_ptr<Image> result = make_shared<Image>(picture.height(), picture.width());
+    int h =  picture.height();
+    int w = picture.width();
+    shared_ptr<Image> result = make_shared<Image>(h, w);
     QRgb original;
     float color;
 
-    for(int i=0; i<picture.height(); i++)
+    for(int i=0; i<h; i++)
     {
-        for(int j=0; j<picture.width(); j++)
+        for(int j=0; j<w; j++)
         {
             original = picture.pixel(j,i);
             color = 0.299 * qRed(original) +
@@ -73,7 +74,6 @@ float Image::getPixel(int i, int j, EdgeMode mode) const
     }
     else
     {
-        //qFatal("out of the range");
         switch(mode)
         {
             case EdgeMode::ZEROS: return 0;
@@ -104,11 +104,11 @@ float Image::setPixel(int i, int j, float value)
     }
 }
 
-shared_ptr<Image> Image::convolution(shared_ptr<Mask> mask,EdgeMode mode)
+shared_ptr<Image> Image::convolution(const Mask& mask,EdgeMode mode) const
 {
     shared_ptr<Image> result = make_shared<Image>(height, width);
-    int maskH = mask->getHeight();
-    int maskW = mask->getWidth();
+    int maskH = mask.getHeight();
+    int maskW = mask.getWidth();
     for(int i=0; i< height; i++)
     {
         for(int j=0; j<width; j++)
@@ -119,7 +119,7 @@ shared_ptr<Image> Image::convolution(shared_ptr<Mask> mask,EdgeMode mode)
                 for(int j1=0; j1 < maskW; j1++)
                 {
                     float iPix = getPixel(i-(i1-maskH/2), j-(j1-maskW/2),mode);
-                    float mPix = mask->getPixel(i1,j1);
+                    float mPix = mask.get(i1,j1);
                     sum += iPix * mPix;
                 }
             }
@@ -132,17 +132,9 @@ shared_ptr<Image> Image::convolution(shared_ptr<Mask> mask,EdgeMode mode)
 
 void Image::normalize()
 {
-    //хз как подружить max_element и unic_ptr
-    auto mm = std::minmax_element(&(image[0]),&(image[width*height]));
+    auto mm = minmax_element(&image[0],&image[width*height]);
     float min = * mm.first;
-    float max = * mm.second;//  float max = image[0];
-   ///for(int i=0; i<width*height; i++)
-   ///{
-   ///    if(max<image[i])
-   ///        max = image[i];
-   ///    if(min>image[i])
-   ///        min = image[i];
-   ///}
+    float max = * mm.second;
 
     for(int i=0; i<width*height; i++)
     {
