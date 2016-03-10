@@ -25,6 +25,7 @@ public:
     static shared_ptr<Image> fromQImage(const QImage &picture);
     shared_ptr<Image> convolution(const Mask &mask, EdgeMode mode) const;
     shared_ptr<Image> convolution(const Mask& row, const Mask& column, EdgeMode mode) const;
+    shared_ptr<Image> DownScale() const;
 
     QImage toQImage() const;
     bool toFile(const QString &fileName)const;

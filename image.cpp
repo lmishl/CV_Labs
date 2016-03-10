@@ -105,11 +105,11 @@ float Image::setPixel(int i, int j, float value)
     }
 }
 
-shared_ptr<Image> Image::convolution(const Mask& mask,EdgeMode mode) const
+shared_ptr<Image> Image::convolution(const Mask& _mask, EdgeMode _mode) const
 {
     shared_ptr<Image> result = make_shared<Image>(height, width);
-    int maskH = mask.getHeight();
-    int maskW = mask.getWidth();
+    int maskH = _mask.getHeight();
+    int maskW = _mask.getWidth();
     for(int i=0; i< height; i++)
     {
         for(int j=0; j<width; j++)
@@ -119,8 +119,8 @@ shared_ptr<Image> Image::convolution(const Mask& mask,EdgeMode mode) const
             {
                 for(int j1=0; j1 < maskW; j1++)
                 {
-                    float iPix = getPixel(i-(i1-maskH/2), j-(j1-maskW/2),mode);
-                    float mPix = mask.get(i1,j1);
+                    float iPix = getPixel(i-(i1-maskH/2), j-(j1-maskW/2),_mode);
+                    float mPix = _mask.get(i1,j1);
                     sum += iPix * mPix;
                 }
             }
@@ -131,30 +131,10 @@ shared_ptr<Image> Image::convolution(const Mask& mask,EdgeMode mode) const
 
 }
 
-shared_ptr<Image> Image::convolution(const Mask& row, const Mask& column, EdgeMode mode) const
+shared_ptr<Image> Image::convolution(const Mask& _row, const Mask& _column, EdgeMode _mode) const
 {
-    shared_ptr<Image> result = convolution(row, mode);
-     result = result->convolution(column, mode);
-
-   // int maskSize = row.getWidth();
-   //
-   // for(int i=0; i< height; i++)
-   // {
-   //     for(int j=0; j<width; j++)
-   //     {
-   //         float sum=0;
-   //         for(int i1=0; i1< maskH; i1++)
-   //         {
-   //             for(int j1=0; j1 < maskW; j1++)
-   //             {
-   //                 float iPix = getPixel(i-(i1-maskH/2), j-(j1-maskW/2),mode);
-   //                 float mPix = mask.get(i1,j1);
-   //                 sum += iPix * mPix;
-   //             }
-   //         }
-   //         result->setPixel(i,j,sum);
-   //     }
-   // }
+    shared_ptr<Image> result = convolution(_row, _mode);
+    result = result->convolution(_column, _mode);
     return result;
 
 }
@@ -165,9 +145,9 @@ void Image::normalize()
     float min = * mm.first;
     float max = * mm.second;
 
-    for(int i=0; i<width*height; i++)
+    for(int i = 0; i < width * height; i++)
     {
-        image[i]= (image[i] - min)/(max-min)*255;
+        image[i] = (image[i] - min)/(max - min)*255;
     }
 }
 
@@ -180,3 +160,14 @@ int Image::getWidth() const
 {
     return width;
 }
+
+ shared_ptr<Image> Image::DownScale() const
+ {
+    int h = height / 2;
+    int w = width / 2;
+    shared_ptr<Image> result = make_shared<Image>(h, w);
+    for(int i = 0; i < h; i++)
+        for(int j = 0; j < w; j++)
+            result->setPixel(i,j, getPixel(i*2,j*2));
+    return result;
+ }
