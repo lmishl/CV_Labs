@@ -67,7 +67,7 @@ vector<shared_ptr<Image>> BuildPyramid(const Image& _im, float _sigma0, int _num
         vec.push_back(curIm);
         for(int j = 0; j < _numLevels; j++)
         {
-            curIm = GaussFilterSep(_im, k, _mode);
+            curIm = GaussFilterSep(*curIm, k, _mode);
              vec.push_back(curIm);
         }
         curIm = curIm->DownScale();
@@ -76,7 +76,9 @@ vector<shared_ptr<Image>> BuildPyramid(const Image& _im, float _sigma0, int _num
 
     //вывод
     for(int i = 0; i < vec.size(); i++)
-        vec[i]->toFile("C:\\1\\" + numOktav + _numLevels + ".jpg");
+    {
+        vec[i]->toFile(("C:\\1\\x" + to_string(i) + ".jpg").c_str());
+    }
 
     return vec;
 }
