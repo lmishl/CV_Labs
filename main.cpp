@@ -10,6 +10,7 @@
 #include <image.h>
 #include <mask.h>
 #include <maskfactory.h>
+#include "pyramid.h"
 using namespace std;
 
 shared_ptr<Image> Sobel(const Image& _im, EdgeMode _mode)
@@ -93,7 +94,8 @@ int main()
     //res2->toFile("C:\\1\\12.jpg");
 
     //BuildPyramid(*myIm, 1.6, 6, EdgeMode::COPY);
-
+    Pyramid p(*myIm, 1.6, 5, EdgeMode::COPY);
+    p.output("C:\\1\\output");
 
     cout<<"\ngood";
 

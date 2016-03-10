@@ -16,10 +16,10 @@ Pyramid::Pyramid(const Image& _im, float _sigma0, int _numLevels, EdgeMode _mode
     //начинаем вычислять октавы
     k = pow(2,1./_numLevels);
 
-
+    float curSigma = sigma0;
     for(int i = 0; i < numOctave; i++ )
     {
-        PyramidLevel level;
+        PyramidLevel level(curSigma,k);
         level.add(curIm);
         for(int j = 0; j < _numLevels; j++)
         {
@@ -28,12 +28,21 @@ Pyramid::Pyramid(const Image& _im, float _sigma0, int _numLevels, EdgeMode _mode
         }
         curIm = curIm->DownScale();
         vec.push_back(level);
+        curSigma *= 2;
     }
 
-    //вывод
-    //for(int i = 0; i < vec.size(); i++)
-    //{
-    //    float trueSigma = _sigma0 * pow(k,i  - (i  / (_numLevels+1)));
-    //    vec[i]->toFile(("C:\\1\\output\\" + to_string(i) + "sig-" +to_string(trueSigma) + ".jpg").c_str());
-    //}
+}
+
+void Pyramid::output(const QString &dirName) const
+{
+    for(int i = 0; i < vec.size(); i++)
+    {
+        for(int j = 0; j < vec[i].size(); j++)
+        {
+            //float trueSigma = sigma0 * pow(k,i  - (i  / (numLevels+1)));
+            QString fileName = dirName + "\\" + QString::number(i) + "-" + QString::number(j) + "-sig-" + QString::number(vec[i].globalSigma(j)) + ".jpg";
+            vec[i].get(j)->toFile(fileName);
+        }
+    }
+
 }

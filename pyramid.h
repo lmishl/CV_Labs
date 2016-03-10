@@ -7,10 +7,10 @@ class Pyramid
 {
 public:
     Pyramid(const Image& _im, float _sigma0, int _numLevels, EdgeMode _mode);
-
+    void output(const QString &dirName) const;
 
 private:
-   vector<shared_ptr<PyramidLevel>> vec;
+   vector<PyramidLevel> vec;
    //Image original;      нужна ли?
    float sigma0;
    int numLevels;
