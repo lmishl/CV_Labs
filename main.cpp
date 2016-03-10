@@ -50,7 +50,7 @@ shared_ptr<Image> GaussFilter(const Image& _im, float _sigma, EdgeMode _mode)
 vector<shared_ptr<Image>> BuildPyramid(const Image& _im, float _sigma0, int _numLevels, EdgeMode _mode)
 {
     int minS = min(_im.getHeight(), _im.getWidth());
-    int numOktav = log2(minS) - 5;      //строим новую октаву пока изображение не станет меньше 32
+    int numOktav = log2(minS) - 5;      //строим новую октаву пока изображение не станет меньше 64
 
     //досглаживаем до sigma0
     MaskFactory factory;
@@ -60,7 +60,6 @@ vector<shared_ptr<Image>> BuildPyramid(const Image& _im, float _sigma0, int _num
     //начинаем вычислять октавы
     float k = pow(2,1./_numLevels);
     vector<shared_ptr<Image>> vec;//= new vector<Image>();
-
 
     for(int i = 0; i < numOktav; i++ )
     {
@@ -73,11 +72,11 @@ vector<shared_ptr<Image>> BuildPyramid(const Image& _im, float _sigma0, int _num
         curIm = curIm->DownScale();
     }
 
-
     //вывод
     for(int i = 0; i < vec.size(); i++)
     {
-        vec[i]->toFile(("C:\\1\\x" + to_string(i) + ".jpg").c_str());
+        float trueSigma = _sigma0 * pow(k,i  - (i  / (_numLevels+1)));
+        vec[i]->toFile(("C:\\1\\output\\" + to_string(i) + "sig-" +to_string(trueSigma) + ".jpg").c_str());
     }
 
     return vec;
@@ -99,7 +98,7 @@ int main()
     //shared_ptr<Image> res2 = GaussFilterSep(*myIm, 3 ,EdgeMode::COPY);
     //res2->toFile("C:\\1\\12.jpg");
 
-    BuildPyramid(*myIm, 1.6, 3, EdgeMode::COPY);
+    BuildPyramid(*myIm, 1.6, 6, EdgeMode::COPY);
 
 
     cout<<"\ngood";
