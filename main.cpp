@@ -39,8 +39,17 @@ int main()
     QString fileName = "C:\\1\\1.jpg";
     shared_ptr<Image> myIm = Image::fromFile(fileName);
 
-    shared_ptr<Image> res = Sobel(*myIm,EdgeMode::ZEROS);
-    res->toFile("C:\\1\\2n.jpg");
+    //shared_ptr<Image> res = Sobel(*myIm,EdgeMode::ZEROS);
+    //res->toFile("C:\\1\\2n.jpg");
+
+    MaskFactory factory;
+    shared_ptr<Image> res1 = myIm->convolution(factory.Gauss(2),EdgeMode::COPY);
+    res1->toFile("C:\\1\\11.jpg");
+    auto pair = factory.GaussSeparated(2);
+    shared_ptr<Image> res2 = myIm->convolution(pair.first,pair.second,EdgeMode::COPY);
+    res2->toFile("C:\\1\\12.jpg");
+
+
     cout<<"\ngood";
 
 

@@ -133,7 +133,8 @@ shared_ptr<Image> Image::convolution(const Mask& mask,EdgeMode mode) const
 
 shared_ptr<Image> Image::convolution(const Mask& row, const Mask& column, EdgeMode mode) const
 {
-    shared_ptr<Image> result = make_shared<Image>(height, width);
+    shared_ptr<Image> result = convolution(row, mode);
+     result = result->convolution(column, mode);
 
    // int maskSize = row.getWidth();
    //

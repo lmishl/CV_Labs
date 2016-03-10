@@ -42,7 +42,7 @@ Mask MaskFactory::Gauss(float sigma)
         for(int j = -half; j <= half; j++)
         {
             float val= pow(M_E,-(i*i+j*j) / (2*sigma2)) / (2* M_PI*sigma2);
-            result.set(i,j,val);
+            result.set(i + half,j + half,val);
         }
     return result;
 
@@ -60,8 +60,8 @@ pair<Mask,Mask> MaskFactory::GaussSeparated(float sigma)
     {
 
         value = (pow(M_E,-(i*i)/(2*sigma2)))/(sqrt(2*M_PI)*sigma);
-        result.first.set(0, i, value);
-        result.first.set(i, 0, value);
+        result.first.set(0, i + half, value);
+        result.second.set(i+ half, 0, value);
     }
 
     return result;
