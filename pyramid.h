@@ -8,6 +8,7 @@ class Pyramid
 public:
     Pyramid(const Image& _im, float _sigma0, int _numLevels, EdgeMode _mode);
     void output(const QString &dirName) const;
+    float L(int _x, int _y, float _sigma) const;
 
 private:
    vector<PyramidLevel> vec;

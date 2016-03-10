@@ -19,7 +19,7 @@ Pyramid::Pyramid(const Image& _im, float _sigma0, int _numLevels, EdgeMode _mode
     float curSigma = sigma0;
     for(int i = 0; i < numOctave; i++ )
     {
-        PyramidLevel level(curSigma,k);
+        PyramidLevel level(curSigma, k, i);
         level.add(curIm);
         for(int j = 0; j < _numLevels; j++)
         {
@@ -45,4 +45,12 @@ void Pyramid::output(const QString &dirName) const
         }
     }
 
+}
+
+float Pyramid::L(int _x, int _y, float _sigma) const
+{
+    int level = 1;
+    while(vec[level].globalSigma(0) < _sigma && level < vec.size())
+        level++;
+    return vec[level].L(_x, _y, _sigma);
 }

@@ -4,10 +4,11 @@ PyramidLevel::PyramidLevel()
 {
 
 }
-PyramidLevel::PyramidLevel(float _sigma, float _k)
+PyramidLevel::PyramidLevel(float _sigma, float _k, int _number)
 {
     sigma = _sigma;
     k = _k;
+    number = _number;
 }
 
 
@@ -34,4 +35,20 @@ float PyramidLevel::globalSigma(int i) const
 float PyramidLevel::localSigma(int i) const
 {
     return pow(k,i);
+}
+
+int PyramidLevel::getNumber() const
+{
+    return number;
+}
+float PyramidLevel::L(int _x, int _y, float _sigma) const
+{
+    int level = 1;
+    while(globalSigma(level) < _sigma && level < vec.size())
+        level++;
+    level--;
+    int x = _x / pow(2, number);
+    int y = _y / pow(2, number);
+
+    return vec[level]->getPixel(x,y);
 }
