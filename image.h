@@ -7,6 +7,7 @@
 #include <math.h>
 #include <time.h>
 #include <mask.h>
+#include "maskfactory.h"
 using namespace std;
 
 enum class EdgeMode
@@ -37,6 +38,9 @@ public:
     int getWidth() const;\
 
     void normalize();
+
+    shared_ptr<Image> GaussFilterSep(float _sigma, EdgeMode _mode) const;
+    shared_ptr<Image> GaussFilter(float _sigma, EdgeMode _mode) const;
 
 
 private:

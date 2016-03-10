@@ -34,52 +34,46 @@ shared_ptr<Image> Sobel(const Image& _im, EdgeMode _mode)
     return result;
 }
 
-shared_ptr<Image> GaussFilterSep(const Image& _im, float _sigma, EdgeMode _mode)
+
+
+//vector<shared_ptr<Image>> BuildPyramid(const Image& _im, float _sigma0, int _numLevels, EdgeMode _mode)
+//{
+//    int minS = min(_im.getHeight(), _im.getWidth());
+//    int numOktav = log2(minS) - 5;      //строим новую октаву пока изображение не станет меньше 64
+//
+//    //досглаживаем до sigma0
+//    MaskFactory factory;
+//    float deltaSigma = sqrt(_sigma0 * _sigma0 - 0.25);
+//    shared_ptr<Image> curIm = GaussFilterSep(_im, deltaSigma, _mode);
+//
+//    //начинаем вычислять октавы
+//    float k = pow(2,1./_numLevels);
+//    vector<shared_ptr<Image>> vec;//= new vector<Image>();
+//
+//    for(int i = 0; i < numOktav; i++ )
+//    {
+//        vec.push_back(curIm);
+//        for(int j = 0; j < _numLevels; j++)
+//        {
+//            curIm = GaussFilterSep(*curIm, k, _mode);
+//             vec.push_back(curIm);
+//        }
+//        curIm = curIm->DownScale();
+//    }
+//
+//    //вывод
+//    for(int i = 0; i < vec.size(); i++)
+//    {
+//        float trueSigma = _sigma0 * pow(k,i  - (i  / (_numLevels+1)));
+//        vec[i]->toFile(("C:\\1\\output\\" + to_string(i) + "sig-" +to_string(trueSigma) + ".jpg").c_str());
+//    }
+//
+//    return vec;
+//}
+
+float L (int x, int y, float sigma)
 {
-    MaskFactory factory;
-    auto pair = factory.GaussSeparated(_sigma);
-    return _im.convolution(pair.first,pair.second,_mode);
-}
 
-shared_ptr<Image> GaussFilter(const Image& _im, float _sigma, EdgeMode _mode)
-{
-    MaskFactory factory;
-    return _im.convolution(factory.Gauss(_sigma),_mode);
-}
-
-vector<shared_ptr<Image>> BuildPyramid(const Image& _im, float _sigma0, int _numLevels, EdgeMode _mode)
-{
-    int minS = min(_im.getHeight(), _im.getWidth());
-    int numOktav = log2(minS) - 5;      //строим новую октаву пока изображение не станет меньше 64
-
-    //досглаживаем до sigma0
-    MaskFactory factory;
-    float deltaSigma = sqrt(_sigma0 * _sigma0 - 0.25);
-    shared_ptr<Image> curIm = GaussFilterSep(_im, deltaSigma, _mode);
-
-    //начинаем вычислять октавы
-    float k = pow(2,1./_numLevels);
-    vector<shared_ptr<Image>> vec;//= new vector<Image>();
-
-    for(int i = 0; i < numOktav; i++ )
-    {
-        vec.push_back(curIm);
-        for(int j = 0; j < _numLevels; j++)
-        {
-            curIm = GaussFilterSep(*curIm, k, _mode);
-             vec.push_back(curIm);
-        }
-        curIm = curIm->DownScale();
-    }
-
-    //вывод
-    for(int i = 0; i < vec.size(); i++)
-    {
-        float trueSigma = _sigma0 * pow(k,i  - (i  / (_numLevels+1)));
-        vec[i]->toFile(("C:\\1\\output\\" + to_string(i) + "sig-" +to_string(trueSigma) + ".jpg").c_str());
-    }
-
-    return vec;
 }
 
 int main()
@@ -98,7 +92,7 @@ int main()
     //shared_ptr<Image> res2 = GaussFilterSep(*myIm, 3 ,EdgeMode::COPY);
     //res2->toFile("C:\\1\\12.jpg");
 
-    BuildPyramid(*myIm, 1.6, 6, EdgeMode::COPY);
+    //BuildPyramid(*myIm, 1.6, 6, EdgeMode::COPY);
 
 
     cout<<"\ngood";
