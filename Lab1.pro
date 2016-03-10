@@ -12,9 +12,13 @@ TEMPLATE = app
 SOURCES += main.cpp \
     image.cpp \
     mask.cpp \
-    maskfactory.cpp
+    maskfactory.cpp \
+    pyramid.cpp \
+    pyramidlevel.cpp
 
 HEADERS += \
     image.h \
     mask.h \
-    maskfactory.h
+    maskfactory.h \
+    pyramid.h \
+    pyramidlevel.h

@@ -171,3 +171,16 @@ int Image::getWidth() const
             result->setPixel(i,j, getPixel(i*2,j*2));
     return result;
  }
+
+ shared_ptr<Image> Image::GaussFilterSep(float _sigma, EdgeMode _mode) const
+ {
+     MaskFactory factory;
+     auto pair = factory.GaussSeparated(_sigma);
+     return convolution(pair.first,pair.second,_mode);
+ }
+
+ shared_ptr<Image> Image::GaussFilter(float _sigma, EdgeMode _mode) const
+ {
+     MaskFactory factory;
+     return convolution(factory.Gauss(_sigma),_mode);
+ }
