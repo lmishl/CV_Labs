@@ -2,27 +2,32 @@
 
 Pyramid::Pyramid(const Image& _im, float _sigma0, int _numLevels, EdgeMode _mode)
 {
+    sigma0 = _sigma0;
+    numLevels = _numLevels;
+
     int minS = min(_im.getHeight(), _im.getWidth());
-    int numOktav = log2(minS) - 5;      //строим новую октаву пока изображение не станет меньше 64
+    numOctave = log2(minS) - 5;      //строим новую октаву пока изображение не станет меньше 64
 
     //досглаживаем до sigma0
     MaskFactory factory;
-    float deltaSigma = sqrt(_sigma0 * _sigma0 - 0.25);
+    float deltaSigma = sqrt(sigma0 * sigma0 - 0.25);
     shared_ptr<Image> curIm = _im.GaussFilterSep(deltaSigma, _mode);
 
     //начинаем вычислять октавы
-    float k = pow(2,1./_numLevels);
-    vector<shared_ptr<Image>> vec;//= new vector<Image>();
+    k = pow(2,1./_numLevels);
 
-    for(int i = 0; i < numOktav; i++ )
+
+    for(int i = 0; i < numOctave; i++ )
     {
-        vec.push_back(curIm);
+        PyramidLevel level;
+        level.add(curIm);
         for(int j = 0; j < _numLevels; j++)
         {
             curIm = curIm->GaussFilterSep(k, _mode);
-            vec.push_back(curIm);
+            level.add(curIm);
         }
         curIm = curIm->DownScale();
+        vec.push_back(level);
     }
 
     //вывод

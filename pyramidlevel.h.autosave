@@ -1,0 +1,15 @@
+#pragma once
+#include "image.h"
+
+
+class PyramidLevel
+{
+public:
+    PyramidLevel();
+    void add(shared_ptr<Image> _im);
+    shared_ptr<Image> get(int i);
+    int size();
+private:
+    vector<shared_ptr<Image>> vec;
+};
+

@@ -11,4 +11,9 @@ public:
 
 private:
    vector<shared_ptr<PyramidLevel>> vec;
+   //Image original;      нужна ли?
+   float sigma0;
+   int numLevels;
+   int numOctave;
+   float k;     //для очередной сигмы
 };
