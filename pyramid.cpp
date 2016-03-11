@@ -19,7 +19,7 @@ Pyramid::Pyramid(const Image& _im, float _sigma0, int _numLevels, EdgeMode _mode
     float curSigma = sigma0;
     for(int i = 0; i < numOctave; i++ )
     {
-        PyramidLevel level(curSigma, k, i);
+        PyramidLevel level(sigma0, k, i);
         level.add(curIm);
         for(int j = 0; j < _numLevels; j++)
         {
@@ -27,7 +27,7 @@ Pyramid::Pyramid(const Image& _im, float _sigma0, int _numLevels, EdgeMode _mode
             level.add(curIm);
         }
         curIm = curIm->DownScale();
-        vec.push_back(level);
+        vec.emplace_back(level);
         curSigma *= 2;
     }
 

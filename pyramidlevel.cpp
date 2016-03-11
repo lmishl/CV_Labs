@@ -1,9 +1,5 @@
 #include "pyramidlevel.h"
 
-PyramidLevel::PyramidLevel()
-{
-
-}
 PyramidLevel::PyramidLevel(float _sigma, float _k, int _number)
 {
     sigma = _sigma;
@@ -12,9 +8,9 @@ PyramidLevel::PyramidLevel(float _sigma, float _k, int _number)
 }
 
 
-void PyramidLevel::add(shared_ptr<Image> _im)
+void PyramidLevel::add(const shared_ptr<Image> &_im)
 {
-    vec.push_back(_im);
+    vec.emplace_back(_im);
 }
 
 shared_ptr<Image> PyramidLevel::get(int i) const
@@ -29,12 +25,12 @@ int PyramidLevel::size() const
 
 float PyramidLevel::globalSigma(int i) const
 {
-    return sigma * pow(k,i);
+    return localSigma(i) * pow(2,number);
 }
 
 float PyramidLevel::localSigma(int i) const
 {
-    return pow(k,i);
+    return sigma * pow(k,i);
 }
 
 int PyramidLevel::getNumber() const
