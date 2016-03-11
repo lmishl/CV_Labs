@@ -16,26 +16,29 @@ Pyramid::Pyramid(const Image& _im, float _sigma0, int _numLevels, EdgeMode _mode
     //начинаем вычислять октавы
     k = pow(2,1./_numLevels);
 
-    float curSigma = sigma0;
     for(int i = 0; i < numOctave; i++ )
     {
         PyramidLevel level(sigma0, k, i);
         level.add(curIm);
+        float curSigma = sigma0;
         for(int j = 0; j < _numLevels; j++)
         {
-            curIm = curIm->GaussFilterSep(k, _mode);
+            float newSigma = curSigma * k;
+            float deltaSigma = sqrt(newSigma * newSigma - curSigma * curSigma);
+
+            curIm = curIm->GaussFilterSep(deltaSigma, _mode);
             level.add(curIm);
+            curSigma = newSigma;
         }
         curIm = curIm->DownScale();
         vec.emplace_back(level);
-        curSigma *= 2;
     }
 
 }
 
 void Pyramid::output(const QString &dirName) const
 {
-    for(int i = 0; i < vec.size(); i++)
+    for(int i = 0, ei = int(vec.size()); i < ei; i++)
     {
         for(int j = 0; j < vec[i].size(); j++)
         {

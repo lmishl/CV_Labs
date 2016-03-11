@@ -78,7 +78,7 @@ int main()
     shared_ptr<Image> myIm = Image::fromFile(fileName);
 
     //BuildPyramid(*myIm, 1.6, 6, EdgeMode::COPY);
-    Pyramid p(*myIm, 1.3, 6, EdgeMode::COPY);
+    Pyramid p(*myIm, 1.6, 6, EdgeMode::COPY);
     p.output("C:\\1\\output");
     cout<<myIm->getPixel(1000,1000)<<endl;
     cout<<p.L(1000,1000,3)<<endl;
