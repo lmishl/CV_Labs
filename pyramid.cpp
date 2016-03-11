@@ -55,5 +55,6 @@ float Pyramid::L(int _x, int _y, float _sigma) const
     int level = 1;
     while(vec[level].globalSigma(0) < _sigma && level < vec.size())
         level++;
+    level--;
     return vec[level].L(_x, _y, _sigma);
 }
