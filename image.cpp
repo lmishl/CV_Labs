@@ -213,7 +213,7 @@ vector<QPoint> Image::FindLocalMax(int _px, int _py, float _T) const
 }
 
 
-vector<QPoint> Image::Moravec(int _px, int _py, float _T, EdgeMode _mode) const
+vector<QPoint> Image::Moravec(int _px, int _py, float _T) const
 {
     int halfW = 1;     //стоит добавить в параметры?
     int halfH = 1;
@@ -234,7 +234,7 @@ vector<QPoint> Image::Moravec(int _px, int _py, float _T, EdgeMode _mode) const
                         for(int v = -halfW; v < halfW; v++)
                         {
 
-                            float dif = getPixel(i + u, j + v, _mode) - getPixel(i + u + dy, j + v + dx, _mode);
+                            float dif = getPixel(i + u, j + v, EdgeMode::COPY) - getPixel(i + u + dy, j + v + dx, EdgeMode::COPY);
                             sum += dif * dif;
 
                         }
@@ -248,7 +248,52 @@ vector<QPoint> Image::Moravec(int _px, int _py, float _T, EdgeMode _mode) const
     return S.FindLocalMax(_px, _py, _T);
 }
 
+float Image::Ix(int _i, int _j) const
+{
+    float left = getPixel(_i, _j - 1, EdgeMode::COPY);
+    float right = getPixel(_i, _j + 1, EdgeMode::COPY);
+    return sqrt((left - right) * (left - right));
+}
 
+float Image::Iy(int _i, int _j) const
+{
+    float up = getPixel(_i + 1, _j, EdgeMode::COPY);
+    float down = getPixel(_i - 1, _j, EdgeMode::COPY);
+    return sqrt((up - down) * (up - down));
+}
+
+vector<QPoint> Image::Harris(int _px, int _py, float _T) const
+{
+    int heightW = 3, widthW = 3;
+    float k = 0.06;
+    Image F(height, width);
+
+    for(int i = 0; i < height; i++)
+        for(int j = 0; j < width; j++)
+        {
+
+            float A = 0, B = 0, C = 0;
+            for(int dy = - heightW; dy < heightW; dy++)
+                for(int dx = -widthW; dx < widthW; dx++)
+                {
+                    if(dy == 0 && dx == 0)          //ведь так?
+                        continue;
+                    float ix = Ix(i + dy, j + dx);
+                    float iy = Iy(i + dy, j + dx);
+                    A += ix * ix;
+                    B += ix * iy;
+                    C += iy * iy;
+                }
+
+            float det = A * B - C *C;
+            float trace = A + B;
+            float curF = det - k * trace;
+
+            F.setPixel(i, j, curF);
+        }
+
+    return F.FindLocalMax(_px, _py, _T);
+}
 
 QImage Image::addPoints(vector<QPoint> _vec) const
 {

@@ -42,7 +42,8 @@ public:
     shared_ptr<Image> GaussFilterSep(float _sigma, EdgeMode _mode) const;
     shared_ptr<Image> GaussFilter(float _sigma, EdgeMode _mode) const;
 
-    vector<QPoint> Moravec(int _px, int _py, float _T, EdgeMode _mode) const;
+    vector<QPoint> Moravec(int _px, int _py, float _T) const;
+    vector<QPoint> Harris(int _px, int _py, float _T) const;
     QImage addPoints(vector<QPoint> _vec) const;
 
 
@@ -53,6 +54,8 @@ private:
     const int height;
     const int width;
     vector<QPoint> FindLocalMax(int _px, int _py, float _T) const;
+    float Ix(int _i, int _j) const;
+    float Iy(int _i, int _j) const;
 
 };
 
