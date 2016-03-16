@@ -42,7 +42,6 @@ void Pyramid::output(const QString &dirName) const
     {
         for(int j = 0; j < vec[i].size(); j++)
         {
-            //float trueSigma = sigma0 * pow(k,i  - (i  / (numLevels+1)));
             QString fileName = dirName + "\\" + QString::number(i) + "-" + QString::number(j) + "-sig-" + QString::number(vec[i].globalSigma(j)) + ".jpg";
             vec[i].get(j)->toFile(fileName);
         }

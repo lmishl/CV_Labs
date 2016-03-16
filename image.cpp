@@ -77,15 +77,15 @@ float Image::getPixel(int i, int j, EdgeMode mode) const
     {
         switch(mode)
         {
-            case EdgeMode::ZEROS: return 0;
-            case EdgeMode::COPY:
-                 return image[min(max(i,0), height-1)*width + min(max(j,0), width-1)];
-            case EdgeMode::MIRROR:
-                if(i<0) i = i*(-1) - 1;
-                if(j<0) j = j*(-1) - 1;
-                if(i>=height) i = height - (i%height) - 1;
-                if(j>=width) j = width - (j%width) - 1;
-                return image[i*width + j];
+        case EdgeMode::ZEROS: return 0;
+        case EdgeMode::COPY:
+            return image[min(max(i,0), height-1)*width + min(max(j,0), width-1)];
+        case EdgeMode::MIRROR:
+            if(i<0) i = i*(-1) - 1;
+            if(j<0) j = j*(-1) - 1;
+            if(i>=height) i = height - (i%height) - 1;
+            if(j>=width) j = width - (j%width) - 1;
+            return image[i*width + j];
         }
     }
     return 0;
@@ -161,8 +161,8 @@ int Image::getWidth() const
     return width;
 }
 
- shared_ptr<Image> Image::DownScale() const
- {
+shared_ptr<Image> Image::DownScale() const
+{
     int h = height / 2;
     int w = width / 2;
     shared_ptr<Image> result = make_shared<Image>(h, w);
@@ -170,17 +170,79 @@ int Image::getWidth() const
         for(int j = 0; j < w; j++)
             result->setPixel(i,j, getPixel(i*2,j*2));
     return result;
- }
+}
 
- shared_ptr<Image> Image::GaussFilterSep(float _sigma, EdgeMode _mode) const
- {
-     MaskFactory factory;
-     auto pair = factory.GaussSeparated(_sigma);
-     return convolution(pair.first,pair.second,_mode);
- }
+shared_ptr<Image> Image::GaussFilterSep(float _sigma, EdgeMode _mode) const
+{
+    MaskFactory factory;
+    auto pair = factory.GaussSeparated(_sigma);
+    return convolution(pair.first,pair.second,_mode);
+}
 
- shared_ptr<Image> Image::GaussFilter(float _sigma, EdgeMode _mode) const
- {
-     MaskFactory factory;
-     return convolution(factory.Gauss(_sigma),_mode);
- }
+shared_ptr<Image> Image::GaussFilter(float _sigma, EdgeMode _mode) const
+{
+    MaskFactory factory;
+    return convolution(factory.Gauss(_sigma),_mode);
+}
+
+vector<QPoint> Image::Moravec(EdgeMode _mode) const
+{
+    int halfW = 1;     //стоит добавить в параметры?
+    int halfH = 1;
+
+    int px = 5;         //стоит добавить в параметры?
+    int py = 5;
+    float T = 50;
+
+    Image S(height, width);
+    vector<QPoint> res;
+
+    for(int i = 0; i < height; i++)
+        for(int j = 0; j < width; j++)
+        {
+            vector <float> c;
+            for(int dy = - halfH; dy < halfH; dy++)
+                for(int dx = -halfW; dx < halfW; dx++)
+                {
+                    if(dx==0 && dy==0)
+                        continue;
+                    float sum = 0;
+                    for(int u = - halfH; u < halfH; u++)
+                        for(int v = -halfW; v < halfW; v++)
+                        {
+
+                            float dif = getPixel(i + u, j + v, _mode) - getPixel(i + u + dy, j + v + dx, _mode);
+                            sum += dif * dif;
+
+                        }
+                    c.emplace_back(sum);
+                }
+
+            float minV = *min_element(c.begin(),c.end());
+            S.setPixel(i, j, minV);
+        }
+    //Функция S получена, надо отфильровать
+    for(int i = 0; i < height; i += py)
+        for(int j = 0; j < width; j += px)
+        {
+            float maxV = S.getPixel(i, j);
+            QPoint maxP(i,j);
+            for(int u = i; u < i + py; u++)
+                for(int v = j; v < j + px; v++)
+                {
+                    float val = S.getPixel(u, v);
+                    if(val > maxV)
+                    {
+                        maxV = val;
+                        maxP.setX(u);
+                        maxP.setY(v);
+                    }
+
+                }
+            if(maxV > T)
+                res.emplace_back(maxP);
+
+        }
+
+return res;
+}
