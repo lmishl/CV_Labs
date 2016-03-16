@@ -41,7 +41,9 @@ int main()
     QString fileName = "C:\\1\\1.jpg";
     shared_ptr<Image> myIm = Image::fromFile(fileName);
 
-    myIm->Moravec(EdgeMode::COPY);
+    vector<QPoint> vec = myIm->Moravec(EdgeMode::COPY);
+    myIm->addPoints(vec).save("C:\\1\\Moravec.jpg");
+
 //    Pyramid p(*myIm, 1.6, 6, EdgeMode::COPY);
 //    p.output("C:\\1\\output");
 

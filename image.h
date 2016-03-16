@@ -41,7 +41,10 @@ public:
 
     shared_ptr<Image> GaussFilterSep(float _sigma, EdgeMode _mode) const;
     shared_ptr<Image> GaussFilter(float _sigma, EdgeMode _mode) const;
+
     vector<QPoint> Moravec(EdgeMode _mode) const;
+    QImage addPoints(vector<QPoint> _vec) const;
+
 
 
 private:

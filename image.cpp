@@ -192,7 +192,7 @@ vector<QPoint> Image::Moravec(EdgeMode _mode) const
 
     int px = 5;         //стоит добавить в параметры?
     int py = 5;
-    float T = 50;
+    float T = 150;
 
     Image S(height, width);
     vector<QPoint> res;
@@ -226,7 +226,7 @@ vector<QPoint> Image::Moravec(EdgeMode _mode) const
         for(int j = 0; j < width; j += px)
         {
             float maxV = S.getPixel(i, j);
-            QPoint maxP(i,j);
+            QPoint maxP(j,i);
             for(int u = i; u < i + py; u++)
                 for(int v = j; v < j + px; v++)
                 {
@@ -234,8 +234,8 @@ vector<QPoint> Image::Moravec(EdgeMode _mode) const
                     if(val > maxV)
                     {
                         maxV = val;
-                        maxP.setX(u);
-                        maxP.setY(v);
+                        maxP.setX(v);
+                        maxP.setY(u);
                     }
 
                 }
@@ -243,6 +243,20 @@ vector<QPoint> Image::Moravec(EdgeMode _mode) const
                 res.emplace_back(maxP);
 
         }
+
+return res;
+}
+
+
+QImage Image::addPoints(vector<QPoint> _vec) const
+{
+    QImage res = toQImage();
+    int size = _vec.size();
+    for(int i = 0; i < size; i++)
+    {
+        res.setPixel(_vec[i], qRgb(255,0,0));
+       // result.setPixel(j, i, qRgb(color,color,color));
+    }
 
 return res;
 }
