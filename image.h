@@ -47,9 +47,12 @@ public:
 
 
 
+
 private:
     const unique_ptr<float[]> image;
     const int height;
     const int width;
+    vector<QPoint> FindLocalMax(int _px, int _py, float _T) const;
+
 };
 

@@ -185,17 +185,40 @@ shared_ptr<Image> Image::GaussFilter(float _sigma, EdgeMode _mode) const
     return convolution(factory.Gauss(_sigma),_mode);
 }
 
+vector<QPoint> Image::FindLocalMax(int _px, int _py, float _T) const
+{
+    vector<QPoint> res;
+    for(int i = 0; i < height; i ++)
+        for(int j = 0; j < width; j ++)
+        {
+            float curV = getPixel(i, j);
+            if(curV <_T)
+                continue;
+
+            bool isLocalMax = true;
+            for(int dy = - _py; dy < _py; dy++)
+                for(int dx = -_px; dx < _px; dx++)
+                {
+                    float val = getPixel(i + dy, j + dx);
+                    if(val > curV)
+                        isLocalMax = false;
+                }
+            if(isLocalMax)
+                res.emplace_back(j,i);
+
+        }
+
+    return res;
+
+}
+
+
 vector<QPoint> Image::Moravec(int _px, int _py, float _T, EdgeMode _mode) const
 {
     int halfW = 1;     //стоит добавить в параметры?
     int halfH = 1;
 
-    //int px = 5;         //стоит добавить в параметры?
-    //int py = 5;
-    //float T = 150;
-
     Image S(height, width);
-    vector<QPoint> res;
 
     for(int i = 0; i < height; i++)
         for(int j = 0; j < width; j++)
@@ -221,29 +244,10 @@ vector<QPoint> Image::Moravec(int _px, int _py, float _T, EdgeMode _mode) const
             float minV = *min_element(c.begin(),c.end());
             S.setPixel(i, j, minV);
         }
-    //Функция S получена, надо отфильровать
-    for(int i = 0; i < height; i ++)
-        for(int j = 0; j < width; j ++)
-        {
-            float curV = S.getPixel(i, j);
-            if(curV <_T)
-                continue;
 
-            bool isLocalMax = true;
-            for(int dy = - _py; dy < _py; dy++)
-                for(int dx = -_px; dx < _px; dx++)
-                {
-                    float val = S.getPixel(i + dy, j + dx);
-                    if(val > curV)
-                        isLocalMax = false;
-                }
-            if(isLocalMax)
-                res.emplace_back(j,i);
-
-        }
-
-return res;
+return S.FindLocalMax(_px, _py, _T);
 }
+
 
 
 QImage Image::addPoints(vector<QPoint> _vec) const
@@ -253,7 +257,6 @@ QImage Image::addPoints(vector<QPoint> _vec) const
     for(int i = 0; i < size; i++)
     {
         res.setPixel(_vec[i], qRgb(255,0,0));
-       // result.setPixel(j, i, qRgb(color,color,color));
     }
 
 return res;
