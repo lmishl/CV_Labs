@@ -245,7 +245,7 @@ vector<QPoint> Image::Moravec(int _px, int _py, float _T, EdgeMode _mode) const
             S.setPixel(i, j, minV);
         }
 
-return S.FindLocalMax(_px, _py, _T);
+    return S.FindLocalMax(_px, _py, _T);
 }
 
 
@@ -259,5 +259,5 @@ QImage Image::addPoints(vector<QPoint> _vec) const
         res.setPixel(_vec[i], qRgb(255,0,0));
     }
 
-return res;
+    return res;
 }
