@@ -185,14 +185,14 @@ shared_ptr<Image> Image::GaussFilter(float _sigma, EdgeMode _mode) const
     return convolution(factory.Gauss(_sigma),_mode);
 }
 
-vector<QPoint> Image::Moravec(EdgeMode _mode) const
+vector<QPoint> Image::Moravec(int _px, int _py, float _T, EdgeMode _mode) const
 {
     int halfW = 1;     //стоит добавить в параметры?
     int halfH = 1;
 
-    int px = 5;         //стоит добавить в параметры?
-    int py = 5;
-    float T = 150;
+    //int px = 5;         //стоит добавить в параметры?
+    //int py = 5;
+    //float T = 150;
 
     Image S(height, width);
     vector<QPoint> res;
@@ -222,25 +222,23 @@ vector<QPoint> Image::Moravec(EdgeMode _mode) const
             S.setPixel(i, j, minV);
         }
     //Функция S получена, надо отфильровать
-    for(int i = 0; i < height; i += py)
-        for(int j = 0; j < width; j += px)
+    for(int i = 0; i < height; i ++)
+        for(int j = 0; j < width; j ++)
         {
-            float maxV = S.getPixel(i, j);
-            QPoint maxP(j,i);
-            for(int u = i; u < i + py; u++)
-                for(int v = j; v < j + px; v++)
-                {
-                    float val = S.getPixel(u, v);
-                    if(val > maxV)
-                    {
-                        maxV = val;
-                        maxP.setX(v);
-                        maxP.setY(u);
-                    }
+            float curV = S.getPixel(i, j);
+            if(curV <_T)
+                continue;
 
+            bool isLocalMax = true;
+            for(int dy = - _py; dy < _py; dy++)
+                for(int dx = -_px; dx < _px; dx++)
+                {
+                    float val = S.getPixel(i + dy, j + dx);
+                    if(val > curV)
+                        isLocalMax = false;
                 }
-            if(maxV > T)
-                res.emplace_back(maxP);
+            if(isLocalMax)
+                res.emplace_back(j,i);
 
         }
 
