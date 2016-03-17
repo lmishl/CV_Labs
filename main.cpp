@@ -44,7 +44,7 @@ int main()
     vector<QPoint> vec = myIm->Moravec(5, 5, 300);
     myIm->addPoints(vec).save("C:\\1\\MoravecL.tif");
 
-    vector<QPoint> vecH = myIm->Harris(5, 5, 5);
+    vector<QPoint> vecH = myIm->Harris(5, 5, 50000000);
     myIm->addPoints(vecH).save("C:\\1\\HarrisL.tif");
 
 //    Pyramid p(*myIm, 1.6, 6, EdgeMode::COPY);

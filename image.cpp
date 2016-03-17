@@ -252,45 +252,72 @@ float Image::Ix(int _i, int _j) const
 {
     float left = getPixel(_i, _j - 1, EdgeMode::COPY);
     float right = getPixel(_i, _j + 1, EdgeMode::COPY);
-    return sqrt((left - right) * (left - right));
+    return right - left;
 }
 
 float Image::Iy(int _i, int _j) const
 {
     float up = getPixel(_i + 1, _j, EdgeMode::COPY);
     float down = getPixel(_i - 1, _j, EdgeMode::COPY);
-    return sqrt((up - down) * (up - down));
+    return up - down;
 }
 
 vector<QPoint> Image::Harris(int _px, int _py, float _T) const
 {
-    int heightW = 3, widthW = 3;
+    int heightW = 5, widthW = 5;
     float k = 0.06;
+
+
+    MaskFactory factory;
+    shared_ptr<Image> gradX = convolution(factory.SobelX(), EdgeMode::COPY);
+    gradX->toFile("C:\\1\\gradX.tif");
+    shared_ptr<Image> gradY = convolution(factory.SobelY(), EdgeMode::COPY);
+    gradY->toFile("C:\\1\\gradY.tif");
+    Image A(height, width), B(height, width), C(height, width);
+    for(int i = 0; i < height; i++)
+        for(int j = 0; j < width; j++)
+        {
+            float a = 0, b = 0, c = 0;
+
+            for(int dy = - heightW/2; dy < heightW/2; dy++)
+                for(int dx = -widthW/2; dx < widthW/2; dx++)
+                {
+                    float x = gradX->getPixel(i + dy, j + dx);
+                    float y = gradY->getPixel(i + dy, j + dx);
+                    a += x * x;
+                    b += x * y;
+                    c += y * y;
+
+                }
+
+            A.setPixel(i, j, a);
+            B.setPixel(i, j, b);
+            C.setPixel(i, j, c);
+        }
+    //теперь знаем а б и с в каждой точке
+
+    A.toFile("C:\\1\\A.tif");
+    B.toFile("C:\\1\\B.tif");
+    C.toFile("C:\\1\\C.tif");
+
+
+
     Image F(height, width);
 
     for(int i = 0; i < height; i++)
         for(int j = 0; j < width; j++)
         {
+            float a = A.getPixel(i, j);
+            float b = B.getPixel(i, j);
+            float c = C.getPixel(i, j);
 
-            float A = 0, B = 0, C = 0;
-            for(int dy = - heightW; dy < heightW; dy++)
-                for(int dx = -widthW; dx < widthW; dx++)
-                {
-                    if(dy == 0 && dx == 0)          //ведь так?
-                        continue;
-                    float ix = Ix(i + dy, j + dx);
-                    float iy = Iy(i + dy, j + dx);
-                    A += ix * ix;
-                    B += ix * iy;
-                    C += iy * iy;
-                }
-
-            float det = A * B - C *C;
-            float trace = A + B;
+            float det = a * b - c *c;
+            float trace = a + b;
             float curF = det - k * trace;
 
             F.setPixel(i, j, curF);
         }
+    F.toFile("C:\\1\\F.tif");
 
     return F.FindLocalMax(_px, _py, _T);
 }
