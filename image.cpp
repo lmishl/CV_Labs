@@ -189,6 +189,9 @@ shared_ptr<Image> Image::GaussFilter(float _sigma, EdgeMode _mode) const
 
 vector<KeyPoint> Image::FindLocalMax( float _T, int _N) const
 {
+    int _py = 2;
+    int _px = 2;
+
     vector<KeyPoint> res;
     //закинем в вектор всё что больше Т
     for(int i = 0; i < height; i ++)
@@ -197,8 +200,20 @@ vector<KeyPoint> Image::FindLocalMax( float _T, int _N) const
             float curV = getPixel(i, j);
             if(curV <_T)
                 continue;
-         res.emplace_back(i, j, curV);
+            bool isLocalMax = true;
+            for(int dy = - _py; dy < _py; dy++)
+                for(int dx = -_px; dx < _px; dx++)
+                {
+                    float val = getPixel(i + dy, j + dx);
+                    if(val > curV)
+                        isLocalMax = false;
+                }
+            if (isLocalMax)
+                res.emplace_back(i, j, curV);
         }
+
+
+
 
     int R = 5;
 
@@ -207,7 +222,7 @@ vector<KeyPoint> Image::FindLocalMax( float _T, int _N) const
         for(int i = 0; i < res.size(); i ++)
         {
             for(int j = 0; j < res.size(); j ++)
-                if(res[i].dist(res[j]) < R && res[i].val <= res[j].val)
+                if(res[i].dist(res[j]) < R && res[i].val < 0.8 * res[j].val)
                 {
                     res.erase(res.begin() + i);
                     i--;
@@ -228,8 +243,8 @@ vector<KeyPoint> Image::Moravec(float _T, int _N) const
 {
     int halfW = 2;     //стоит добавить в параметры?
     int halfH = 2;
-    int maxU = 2;
-    int maxV = 2;
+    int maxU = 1;
+    int maxV = 1;
 
     Image S(height, width);
 
@@ -308,6 +323,7 @@ vector<KeyPoint> Image::Harris(float _T, int _N) const
             C.setPixel(i, j, c);
         }
     //теперь знаем а б и с в каждой точке
+
 
     A.toFile("C:\\1\\A.tif");
     B.toFile("C:\\1\\B.tif");
