@@ -217,6 +217,8 @@ vector<QPoint> Image::Moravec(int _px, int _py, float _T) const
 {
     int halfW = 1;     //стоит добавить в параметры?
     int halfH = 1;
+    int maxU = 1;
+    int maxV = 1;
 
     Image S(height, width);
 
@@ -230,8 +232,8 @@ vector<QPoint> Image::Moravec(int _px, int _py, float _T) const
                     if(dx==0 && dy==0)
                         continue;
                     float sum = 0;
-                    for(int u = - halfH; u < halfH; u++)
-                        for(int v = -halfW; v < halfW; v++)
+                    for(int u = - halfH; u < maxU; u++)
+                        for(int v = -halfW; v < maxV; v++)
                         {
 
                             float dif = getPixel(i + u, j + v, EdgeMode::COPY) - getPixel(i + u + dy, j + v + dx, EdgeMode::COPY);
@@ -311,9 +313,9 @@ vector<QPoint> Image::Harris(int _px, int _py, float _T) const
             float b = B.getPixel(i, j);
             float c = C.getPixel(i, j);
 
-            float det = a * b - c *c;
-            float trace = a + b;
-            float curF = det - k * trace;
+            float det = a * c - b * b;
+            float trace = a + c;
+            float curF = det - k * trace * trace;
 
             F.setPixel(i, j, curF);
         }
