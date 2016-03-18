@@ -17,6 +17,24 @@ enum class EdgeMode
     COPY = 3
 };
 
+struct KeyPoint
+{
+    int x,y;
+    float val;
+    KeyPoint(int _x, int _y, float _val)
+    {
+        x = _x;
+        y = _y;
+        val = _val;
+    }
+
+    float dist(KeyPoint p)
+    {
+        return sqrt((x - p.x) * (x - p.x) + (y - p.y) * (y - p.y));
+
+    }
+};
+
 class Image
 {
 public:
@@ -42,9 +60,9 @@ public:
     shared_ptr<Image> GaussFilterSep(float _sigma, EdgeMode _mode) const;
     shared_ptr<Image> GaussFilter(float _sigma, EdgeMode _mode) const;
 
-    vector<QPoint> Moravec(int _px, int _py, float _T) const;
-    vector<QPoint> Harris(int _px, int _py, float _T) const;
-    QImage addPoints(vector<QPoint> _vec) const;
+    vector<KeyPoint> Moravec(float _T, int _N) const;
+    vector<KeyPoint> Harris(float _T, int _N) const;
+    QImage addPoints(vector<KeyPoint> _vec) const;
 
 
 
@@ -53,7 +71,7 @@ private:
     const unique_ptr<float[]> image;
     const int height;
     const int width;
-    vector<QPoint> FindLocalMax(int _px, int _py, float _T) const;
+    vector<KeyPoint> FindLocalMax( float _T, int _N) const;
     float Ix(int _i, int _j) const;
     float Iy(int _i, int _j) const;
 

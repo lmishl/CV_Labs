@@ -168,7 +168,7 @@ shared_ptr<Image> Image::DownScale() const
     shared_ptr<Image> result = make_shared<Image>(h, w);
     for(int i = 0; i < h; i++)
         for(int j = 0; j < w; j++)
-            result->setPixel(i,j, getPixel(i*2,j*2));
+            result->setPixel(i, j, getPixel(i*2,j*2));
     return result;
 }
 
@@ -185,40 +185,51 @@ shared_ptr<Image> Image::GaussFilter(float _sigma, EdgeMode _mode) const
     return convolution(factory.Gauss(_sigma),_mode);
 }
 
-vector<QPoint> Image::FindLocalMax(int _px, int _py, float _T) const
+
+
+vector<KeyPoint> Image::FindLocalMax( float _T, int _N) const
 {
-    vector<QPoint> res;
+    vector<KeyPoint> res;
+    //закинем в вектор всё что больше Т
     for(int i = 0; i < height; i ++)
         for(int j = 0; j < width; j ++)
         {
             float curV = getPixel(i, j);
             if(curV <_T)
                 continue;
-
-            bool isLocalMax = true;
-            for(int dy = - _py; dy < _py; dy++)
-                for(int dx = -_px; dx < _px; dx++)
-                {
-                    float val = getPixel(i + dy, j + dx);
-                    if(val > curV)
-                        isLocalMax = false;
-                }
-            if(isLocalMax)
-                res.emplace_back(j,i);
-
+         res.emplace_back(i, j, curV);
         }
+
+    int R = 5;
+
+    while(res.size()>_N)
+    {
+        for(int i = 0; i < res.size(); i ++)
+        {
+            for(int j = 0; j < res.size(); j ++)
+                if(res[i].dist(res[j]) < R && res[i].val <= res[j].val)
+                {
+                    res.erase(res.begin() + i);
+                    i--;
+                    break;
+                }
+        }
+        R++;
+
+    }
+
 
     return res;
 
 }
 
 
-vector<QPoint> Image::Moravec(int _px, int _py, float _T) const
+vector<KeyPoint> Image::Moravec(float _T, int _N) const
 {
-    int halfW = 1;     //стоит добавить в параметры?
-    int halfH = 1;
-    int maxU = 1;
-    int maxV = 1;
+    int halfW = 2;     //стоит добавить в параметры?
+    int halfH = 2;
+    int maxU = 2;
+    int maxV = 2;
 
     Image S(height, width);
 
@@ -247,7 +258,7 @@ vector<QPoint> Image::Moravec(int _px, int _py, float _T) const
             S.setPixel(i, j, minV);
         }
 
-    return S.FindLocalMax(_px, _py, _T);
+    return S.FindLocalMax(_T, _N);
 }
 
 float Image::Ix(int _i, int _j) const
@@ -264,7 +275,7 @@ float Image::Iy(int _i, int _j) const
     return up - down;
 }
 
-vector<QPoint> Image::Harris(int _px, int _py, float _T) const
+vector<KeyPoint> Image::Harris(float _T, int _N) const
 {
     int heightW = 5, widthW = 5;
     float k = 0.06;
@@ -321,16 +332,16 @@ vector<QPoint> Image::Harris(int _px, int _py, float _T) const
         }
     F.toFile("C:\\1\\F.tif");
 
-    return F.FindLocalMax(_px, _py, _T);
+    return F.FindLocalMax(_T, _N);
 }
 
-QImage Image::addPoints(vector<QPoint> _vec) const
+QImage Image::addPoints(vector<KeyPoint> _vec) const
 {
     QImage res = toQImage();
     int size = _vec.size();
     for(int i = 0; i < size; i++)
     {
-        res.setPixel(_vec[i], qRgb(255,0,0));
+        res.setPixel(_vec[i].y, _vec[i].x, qRgb(255,0,0));
     }
 
     return res;

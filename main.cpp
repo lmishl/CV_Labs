@@ -41,10 +41,10 @@ int main()
     QString fileName = "C:\\1\\lena.tif";
     shared_ptr<Image> myIm = Image::fromFile(fileName);
 
-    vector<QPoint> vec = myIm->Moravec(5, 5, 300);
+    vector<KeyPoint> vec = myIm->Moravec(300, 300);
     myIm->addPoints(vec).save("C:\\1\\MoravecL.tif");
 
-    vector<QPoint> vecH = myIm->Harris(5, 5, 50000000);
+    vector<KeyPoint> vecH = myIm->Harris(50000000, 300);
     myIm->addPoints(vecH).save("C:\\1\\HarrisL.tif");
 
 //    Pyramid p(*myIm, 1.6, 6, EdgeMode::COPY);
