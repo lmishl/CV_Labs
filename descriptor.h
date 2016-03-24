@@ -5,9 +5,15 @@ class Descriptor
 {
 public:
 
-    Descriptor();
+    Descriptor(vector<float> _vec);
+    float dist(Descriptor d) const;
+    float get(int _num) const;
+    int length() const
+    {
+        return vec.size();
+    }
 
 private:
-    vector<float> vec;
+    const vector<float> vec;
 };
 

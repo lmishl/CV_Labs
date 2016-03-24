@@ -25,9 +25,6 @@ DescriptorFactory::DescriptorFactory(const Image &image)
 
 shared_ptr<Descriptor> DescriptorFactory::get(KeyPoint _p, int _gistSize, int _gistNum, int _basketNum)
 {
-
-    auto descriptor = make_shared<Descriptor>();
-
     int netSize = _gistNum * _gistSize;
     vector<float> result;
 
@@ -75,17 +72,11 @@ shared_ptr<Descriptor> DescriptorFactory::get(KeyPoint _p, int _gistSize, int _g
                     //раскидываем обратнопропорционально расстоянию
                     basket[basket1] += weight * (1 - b1Dist / basketSize) ;
                     basket[basket2] += weight * (1 - b2Dist / basketSize) ;
-
-
                 }
-
+            //запишем результат в итоговый вектор
             for(int k = 0; k < _basketNum; k++)
                 result.emplace_back(basket[k]);
-
-
         }
 
-
-
-
+return make_shared<Descriptor>(result);
 }
