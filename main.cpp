@@ -11,6 +11,7 @@
 #include <mask.h>
 #include <maskfactory.h>
 #include "pyramid.h"
+#include <descriptorfactory.h>
 using namespace std;
 
 shared_ptr<Image> Sobel(const Image& _im, EdgeMode _mode)
@@ -42,14 +43,17 @@ int main()
     shared_ptr<Image> myIm = Image::fromFile(fileName);
 
 
-    vector<KeyPoint> vec = myIm->Moravec(0.01, 3000);
-
+    vector<KeyPoint> vec = myIm->Moravec(0.01, 300);
     myIm->addPoints(vec).save("C:\\1\\MoravecL.tif");
 
-    myIm->ot0do1();
-    vector<KeyPoint> vecH = myIm->Harris(4, 3000);
-    myIm->normalize();
-    myIm->addPoints(vecH).save("C:\\1\\HarrisL.tif");
+   // vector<KeyPoint> vecH = myIm->Harris(4, 300);
+    //myIm->addPoints(vecH).save("C:\\1\\HarrisL.tif");
+
+
+    DescriptorFactory factory(*myIm);
+
+    //for(int i = 0; i < vec.)
+    factory.get(vec[55], 4, 4, 8);
 
 //    Pyramid p(*myIm, 1.6, 6, EdgeMode::COPY);
 //    p.output("C:\\1\\output");
