@@ -31,8 +31,8 @@ shared_ptr<Image> Sobel(const Image& _im, EdgeMode _mode)
             float G = hypot(xPix,yPix);//sqrt(xPix*xPix + yPix*yPix);
             result->setPixel(i,j,G);
         }
-    result->normalize();
-    return result;
+   return result->normalize();
+
 }
 
 
@@ -41,10 +41,14 @@ int main()
     QString fileName = "C:\\1\\lena.tif";
     shared_ptr<Image> myIm = Image::fromFile(fileName);
 
-    vector<KeyPoint> vec = myIm->Moravec(300, 300);
+
+    vector<KeyPoint> vec = myIm->Moravec(0.01, 3000);
+
     myIm->addPoints(vec).save("C:\\1\\MoravecL.tif");
 
-    vector<KeyPoint> vecH = myIm->Harris(50000000, 300);
+    myIm->ot0do1();
+    vector<KeyPoint> vecH = myIm->Harris(4, 3000);
+    myIm->normalize();
     myIm->addPoints(vecH).save("C:\\1\\HarrisL.tif");
 
 //    Pyramid p(*myIm, 1.6, 6, EdgeMode::COPY);

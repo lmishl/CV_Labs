@@ -139,16 +139,38 @@ shared_ptr<Image> Image::convolution(const Mask& _row, const Mask& _column, Edge
 
 }
 
-void Image::normalize()
+shared_ptr<Image> Image::normalize() const
 {
     auto mm = minmax_element(&image[0],&image[width*height]);
     float min = * mm.first;
     float max = * mm.second;
 
-    for(int i = 0; i < width * height; i++)
+    shared_ptr<Image> result = make_shared<Image>(height, width);
+
+    for(int i=0; i< height; i++)
     {
-        image[i] = (image[i] - min)/(max - min)*255;
+        for(int j=0; j<width; j++)
+        {
+            float val = (getPixel(i,j) - min)/(max - min)*255;
+            result->setPixel(i,j,val);
+        }
     }
+    return result;
+}
+
+shared_ptr<Image> Image::ot0do1() const
+{
+    shared_ptr<Image> result = make_shared<Image>(height, width);
+
+    for(int i=0; i< height; i++)
+    {
+        for(int j=0; j<width; j++)
+        {
+            float val = getPixel(i,j) / 255;
+            result->setPixel(i,j,val);
+        }
+    }
+    return result;
 }
 
 int Image::getHeight() const
@@ -198,15 +220,24 @@ vector<KeyPoint> Image::FindLocalMax( float _T, int _N) const
         for(int j = 0; j < width; j ++)
         {
             float curV = getPixel(i, j);
+            //if(i == 66 && j==227)
+            //    _py=2;
             if(curV <_T)
                 continue;
             bool isLocalMax = true;
             for(int dy = - _py; dy < _py; dy++)
                 for(int dx = -_px; dx < _px; dx++)
                 {
+                    if(dx == 0 && dy == 0)
+                        continue;
                     float val = getPixel(i + dy, j + dx);
                     if(val > curV)
                         isLocalMax = false;
+                    if(val == curV)
+                    {
+                        if(dx>=0)   //если справа есть такой же - удаляем
+                            isLocalMax = false;
+                    }
                 }
             if (isLocalMax)
                 res.emplace_back(i, j, curV);
@@ -247,6 +278,7 @@ vector<KeyPoint> Image::Moravec(float _T, int _N) const
     int maxV = 1;
 
     Image S(height, width);
+    shared_ptr<Image> working = ot0do1();
 
     for(int i = 0; i < height; i++)
         for(int j = 0; j < width; j++)
@@ -262,7 +294,7 @@ vector<KeyPoint> Image::Moravec(float _T, int _N) const
                         for(int v = -halfW; v < maxV; v++)
                         {
 
-                            float dif = getPixel(i + u, j + v, EdgeMode::COPY) - getPixel(i + u + dy, j + v + dx, EdgeMode::COPY);
+                            float dif = working->getPixel(i + u, j + v, EdgeMode::COPY) - working->getPixel(i + u + dy, j + v + dx, EdgeMode::COPY);
                             sum += dif * dif;
 
                         }
@@ -294,12 +326,12 @@ vector<KeyPoint> Image::Harris(float _T, int _N) const
 {
     int heightW = 5, widthW = 5;
     float k = 0.06;
-
+    shared_ptr<Image> working = ot0do1();
 
     MaskFactory factory;
-    shared_ptr<Image> gradX = convolution(factory.SobelX(), EdgeMode::COPY);
+    shared_ptr<Image> gradX = working->convolution(factory.SobelX(), EdgeMode::COPY);
     gradX->toFile("C:\\1\\gradX.tif");
-    shared_ptr<Image> gradY = convolution(factory.SobelY(), EdgeMode::COPY);
+    shared_ptr<Image> gradY = working->convolution(factory.SobelY(), EdgeMode::COPY);
     gradY->toFile("C:\\1\\gradY.tif");
     Image A(height, width), B(height, width), C(height, width);
     for(int i = 0; i < height; i++)
@@ -315,7 +347,6 @@ vector<KeyPoint> Image::Harris(float _T, int _N) const
                     a += x * x;
                     b += x * y;
                     c += y * y;
-
                 }
 
             A.setPixel(i, j, a);
@@ -346,9 +377,11 @@ vector<KeyPoint> Image::Harris(float _T, int _N) const
 
             F.setPixel(i, j, curF);
         }
+    vector<KeyPoint> qq = F.FindLocalMax(_T, _N);
+    F.normalize();
     F.toFile("C:\\1\\F.tif");
 
-    return F.FindLocalMax(_T, _N);
+    return qq;
 }
 
 QImage Image::addPoints(vector<KeyPoint> _vec) const

@@ -14,11 +14,15 @@ SOURCES += main.cpp \
     mask.cpp \
     maskfactory.cpp \
     pyramid.cpp \
-    pyramidlevel.cpp
+    pyramidlevel.cpp \
+    descriptor.cpp \
+    descriptorfactory.cpp
 
 HEADERS += \
     image.h \
     mask.h \
     maskfactory.h \
     pyramid.h \
-    pyramidlevel.h
+    pyramidlevel.h \
+    descriptor.h \
+    descriptorfactory.h
