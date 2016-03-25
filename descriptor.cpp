@@ -1,8 +1,10 @@
 #include "descriptor.h"
 
-Descriptor::Descriptor(vector<float> _vec):
-    vec(_vec)
+Descriptor::Descriptor(vector<float> _vec, KeyPoint _point):
+    point(_point)
 {
+    vec = _vec;
+    normalize();
 }
 
 float Descriptor::get(int _num) const

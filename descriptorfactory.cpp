@@ -78,5 +78,5 @@ shared_ptr<Descriptor> DescriptorFactory::get(KeyPoint _p, int _gistSize, int _g
                 result.emplace_back(basket[k]);
         }
 
-return make_shared<Descriptor>(result);
+return make_shared<Descriptor>(result, _p);
 }
