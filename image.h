@@ -76,8 +76,8 @@ private:
     const int height;
     const int width;
     vector<KeyPoint> FindLocalMax( float _T, int _N) const;
-    float Ix(int _i, int _j) const;
-    float Iy(int _i, int _j) const;
+   // float Ix(int _i, int _j) const;
+   // float Iy(int _i, int _j) const;
 
 };
 
