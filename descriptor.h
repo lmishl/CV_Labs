@@ -13,7 +13,10 @@ public:
         return vec.size();
     }
 
+
 private:
-    const vector<float> vec;
+    vector<float> vec;
+    float magnitude() const;
+    void normalize();
 };
 

@@ -39,24 +39,28 @@ shared_ptr<Image> Sobel(const Image& _im, EdgeMode _mode)
 
 int main()
 {
-    QString fileName = "C:\\1\\lena.tif";
-    shared_ptr<Image> myIm = Image::fromFile(fileName);
+    QString fileName1 = "C:\\4\\q1.jpg";
+    shared_ptr<Image> myIm1 = Image::fromFile(fileName1);
+
+    QString fileName2 = "C:\\4\\q2.jpg";
+    shared_ptr<Image> myIm2 = Image::fromFile(fileName2);
 
 
-    vector<KeyPoint> vec = myIm->Moravec(0.01, 300);
-    myIm->addPoints(vec).save("C:\\1\\MoravecL.tif");
+    vector<KeyPoint> vec1 = myIm1->Harris(4, 70);
+    vector<KeyPoint> vec2 = myIm2->Harris(4, 70);
+
+    //myIm->addPoints(vec).save("C:\\1\\MoravecL.tif");
 
    // vector<KeyPoint> vecH = myIm->Harris(4, 300);
     //myIm->addPoints(vecH).save("C:\\1\\HarrisL.tif");
 
 
-    DescriptorFactory factory(*myIm);
+    DescriptorFactory factory1(*myIm1);
+    DescriptorFactory factory2(*myIm2);
 
-    //for(int i = 0; i < vec.)
-    factory.get(vec[55], 4, 4, 8);
+    //Находим ближайщий
 
-//    Pyramid p(*myIm, 1.6, 6, EdgeMode::COPY);
-//    p.output("C:\\1\\output");
+
 
     cout<<"\ngood";
 
