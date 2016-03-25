@@ -399,3 +399,18 @@ QImage Image::addPoints(vector<KeyPoint> _vec) const
 
     return res;
 }
+
+
+QImage Image::Union(const Image &rightIm) const
+{
+    QImage left = toQImage();
+    QImage right = rightIm.toQImage();
+
+    QImage destImage( width * 2, height, QImage::Format_RGB32 );
+    QPainter painter;
+    painter.begin(&destImage);
+    painter.drawImage(QPoint(0,0), left);
+    painter.drawImage(QPoint(width,0), right);
+    painter.end();
+    return destImage;
+}

@@ -3,6 +3,7 @@
 #include <memory>
 #include <limits>
 #include <QImage>
+#include <QPainter>
 #include <QtDebug>
 #include <math.h>
 #include <time.h>
@@ -64,6 +65,8 @@ public:
     vector<KeyPoint> Moravec(float _T, int _N) const;
     vector<KeyPoint> Harris(float _T, int _N) const;
     QImage addPoints(vector<KeyPoint> _vec) const;
+
+    QImage Union(const Image &rightIm) const;
 
 
 

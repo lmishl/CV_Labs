@@ -80,21 +80,22 @@ int findClosest2(Descriptor _p, vector<Descriptor> _vec)
 
 int main()
 {
-    QString fileName1 = "C:\\4\\q1.jpg";
+    QString fileName1 = "C:\\4\\q1.png";
     shared_ptr<Image> myIm1 = Image::fromFile(fileName1);
 
-    QString fileName2 = "C:\\4\\q2.jpg";
+    QString fileName2 = "C:\\4\\q2.png";
     shared_ptr<Image> myIm2 = Image::fromFile(fileName2);
 
 
-    vector<KeyPoint> points1 = myIm1->Harris(4, 70);
-    vector<KeyPoint> points2 = myIm2->Harris(4, 70);
+    vector<KeyPoint> points1 = myIm1->Harris(4, 100);
+    vector<KeyPoint> points2 = myIm2->Harris(4, 100);
 
     //myIm->addPoints(vec).save("C:\\1\\MoravecL.tif");
 
     // vector<KeyPoint> vecH = myIm->Harris(4, 300);
     //myIm->addPoints(vecH).save("C:\\1\\HarrisL.tif");
-
+    myIm1->addPoints(points1).save("C:\\4\\Pq1.tif");
+    myIm2->addPoints(points2).save("C:\\4\\Pq2.tif");
 
     DescriptorFactory factory1(*myIm1);
     DescriptorFactory factory2(*myIm2);
@@ -112,7 +113,14 @@ int main()
         descs2.emplace_back(*factory2.get(points2[i], 4, 4, 8));
     }
 
-    //ищем ближайщие
+
+    QImage unIm = myIm1->Union(*myIm2);//save("C:\\4\\Un.png");
+    QPainter painter;
+    painter.begin(&unIm);
+    painter.setBrush(Qt::cyan);
+    painter.setPen(Qt::darkCyan);
+    //ищем пары
+    vector <pair<KeyPoint, KeyPoint> > pairs;
     for(int i = 0; i < descs1.size(); i++)
     {
         int close1 = findClosest(descs1[i], descs2);
@@ -121,15 +129,21 @@ int main()
         float dist1 = descs1[i].dist(descs2[close1]);
         float dist2 = descs1[i].dist(descs2[close2]);
 
-        if(dist2 / dist1 > 0.8)
+        if(dist1 / dist2 > 0.8)
             continue;       //ненадёжно
 
-      //  pair<KeyPoint, KeyPoint>   кароче рисуем
 
+        KeyPoint left = descs1[i].getPoint();
+        KeyPoint right = descs2[close1].getPoint();
+        //кароче рисуем
+        painter.drawLine(QPoint(left.y, left.x), QPoint(right.y + myIm1->getWidth(), right.x));
+       // break;
 
     }
+    painter.end();
 
 
+    unIm.save("C:\\4\\Un.png");
 
     cout<<"\ngood";
 
