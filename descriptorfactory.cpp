@@ -16,7 +16,6 @@ DescriptorFactory::DescriptorFactory(const Image &image)
         for(int j=0; j<image.getWidth(); j++)
         {
             angles->setPixel(i,j,atan2(dy->getPixel(i,j), dx->getPixel(i, j)) * 180 / M_PI + 180);
-
             magnitudes->setPixel(i, j, hypot(dx->getPixel(i,j), dy->getPixel(i,j)));
         }
     }
@@ -26,6 +25,7 @@ DescriptorFactory::DescriptorFactory(const Image &image)
 shared_ptr<Descriptor> DescriptorFactory::get(KeyPoint _p)
 {
     array<float, DescriptorDims> result;
+    result.fill(0);
     int netSize = GistNum * GistSize;
 
     float binSize = 360.0 / BinNum; //размер корзины в градусах
@@ -52,7 +52,7 @@ shared_ptr<Descriptor> DescriptorFactory::get(KeyPoint _p)
 
             //вычисляем соседнюю
             int bin2 = bin1 + 1;
-            if(angle > b1Center)
+            if(angle < b1Center)
                 bin2  = bin1 - 1;
             //обрабатываем граничные случаи
             bin2 = (bin2 + BinNum) % BinNum;

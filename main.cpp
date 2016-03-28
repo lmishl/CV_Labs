@@ -36,44 +36,36 @@ shared_ptr<Image> Sobel(const Image& _im, EdgeMode _mode)
 
 }
 
-int findClosest(Descriptor _p, vector<Descriptor> _vec)
+
+pair<int, int> findClosestPair(Descriptor _p, vector<Descriptor> _vec)
 {
-    int res = 0;
-    float minDist = _p.dist(_vec[0]);
-    for(int i = 1; i < _vec.size(); i++)
+    int res1 = 0, res2 = 1;
+    float minDist1 = _p.dist(_vec[0]);
+    float minDist2 = _p.dist(_vec[1]);
+    if(minDist1 > minDist2)
+    {
+        swap(minDist1, minDist2);
+        swap(res1, res2);
+    }
+
+    for(int i = 2; i < _vec.size(); i++)
     {
         float dist = _p.dist(_vec[i]);
-        if(dist < minDist)
+        if(dist < minDist1)     //нашли меньше обоих
         {
-            minDist = dist;
-            res = i;
+            swap(minDist1, minDist2);
+            swap(res1, res2);
+            minDist1 = dist;
+            res1 = i;
         }
+        else
+            if(dist < minDist2)     //нашли меньше второго
+            {
+                minDist2 = dist;
+                res2 = i;
+            }
     }
-    return res;
-}
-
-int findClosest2(Descriptor _p, vector<Descriptor> _vec)
-{
-
-    int close1 = findClosest(_p, _vec);
-
-
-    int res = -1;
-    float minDist = std::numeric_limits<float>::max();
-
-    for(int i = 0; i < _vec.size(); i++)
-    {
-        if(i == close1)     //ближайший пропускаем
-            continue;
-
-        float dist = _p.dist(_vec[i]);
-        if(dist < minDist)
-        {
-            minDist = dist;
-            res = i;
-        }
-    }
-    return res;
+    return pair<int, int>(res1, res2);
 }
 
 
@@ -85,11 +77,12 @@ int main()
     myIm1 = myIm1->GaussFilterSep(0.8, EdgeMode::COPY);
     QString fileName2 = "C:\\4\\q2.png";
     shared_ptr<Image> myIm2 = Image::fromFile(fileName2);
-     myIm2 = myIm2->GaussFilterSep(0.8, EdgeMode::COPY);
+    myIm2 = myIm2->GaussFilterSep(0.8, EdgeMode::COPY);
 
 
-    vector<KeyPoint> points1 = myIm1->Moravec(0.02, 300);//myIm1->Harris(4, 100);
-    vector<KeyPoint> points2 = myIm2->Moravec(0.02, 300);//myIm2->Harris(4, 100);
+    vector<KeyPoint> points1 = myIm1->Harris(4, 100);//Moravec(0.02, 300);//
+
+    vector<KeyPoint> points2 = myIm2->Harris(4, 100);// Moravec(0.02, 300);//
 
     //myIm->addPoints(vec).save("C:\\1\\MoravecL.tif");
 
@@ -118,14 +111,13 @@ int main()
     QImage unIm = myIm1->Union(*myIm2);//save("C:\\4\\Un.png");
     QPainter painter;
     painter.begin(&unIm);
-    painter.setBrush(Qt::cyan);
     painter.setPen(Qt::darkCyan);
     //ищем пары
-    vector <pair<KeyPoint, KeyPoint> > pairs;
     for(int i = 0; i < descs1.size(); i++)
     {
-        int close1 = findClosest(descs1[i], descs2);
-        int close2 = findClosest2(descs1[i], descs2);
+        auto min = findClosestPair(descs1[i], descs2);
+        int close1 = min.first;
+        int close2 = min.second;
 
         float dist1 = descs1[i].dist(descs2[close1]);
         float dist2 = descs1[i].dist(descs2[close2]);
@@ -138,7 +130,7 @@ int main()
         KeyPoint right = descs2[close1].getPoint();
         //кароче рисуем
         painter.drawLine(QPoint(left.y, left.x), QPoint(right.y + myIm1->getWidth(), right.x));
-       // break;
+
 
     }
     painter.end();
