@@ -1,17 +1,17 @@
 #pragma once
 #include "image.h"
+static const unsigned GistSize = 4;
+static const unsigned GistNum = 4;
+static const unsigned BinNum = 8;
+static const unsigned DescriptorDims = GistSize * GistNum * BinNum;
 
 class Descriptor
 {
 public:
 
-    Descriptor(vector<float> _vec, KeyPoint _point);
-    float dist(Descriptor d) const;
+    Descriptor(const array<float, DescriptorDims> &_vec, KeyPoint _point);
+    float dist(const Descriptor &d) const;
     float get(int _num) const;
-    int length() const
-    {
-        return vec.size();
-    }
 
     KeyPoint getPoint()
     {
@@ -21,7 +21,7 @@ public:
 
 
 private:
-    vector<float> vec;
+    array<float, DescriptorDims> vec;
     float magnitude() const;
     void normalize();
     const KeyPoint point;

@@ -55,6 +55,8 @@ QImage Image::toQImage() const
         for(int j=0; j<width; j++)
         {
             color = qRound(getPixel(i, j));
+            if(color>255)
+                color = 255;
             result.setPixel(j, i, qRgb(color,color,color));
         }
     }
@@ -220,8 +222,6 @@ vector<KeyPoint> Image::FindLocalMax( float _T, int _N) const
         for(int j = 0; j < width; j ++)
         {
             float curV = getPixel(i, j);
-            //if(i == 66 && j==227)
-            //    _py=2;
             if(curV <_T)
                 continue;
             bool isLocalMax = true;
@@ -253,12 +253,13 @@ vector<KeyPoint> Image::FindLocalMax( float _T, int _N) const
         for(int i = 0; i < res.size(); i ++)
         {
             for(int j = 0; j < res.size(); j ++)
-                if(res[i].dist(res[j]) < R && res[i].val < 0.8 * res[j].val)
-                {
-                    res.erase(res.begin() + i);
-                    i--;
-                    break;
-                }
+                if(res[i].dist(res[j]) < R)     //нашли соседа
+                    if( res[i].val < 0.9 * res[j].val)
+                    {
+                        res.erase(res.begin() + i);
+                        i--;
+                        break;
+                    }
         }
         R++;
 
@@ -308,19 +309,19 @@ vector<KeyPoint> Image::Moravec(float _T, int _N) const
     return S.FindLocalMax(_T, _N);
 }
 
-float Image::Ix(int _i, int _j) const
-{
-    float left = getPixel(_i, _j - 1, EdgeMode::COPY);
-    float right = getPixel(_i, _j + 1, EdgeMode::COPY);
-    return right - left;
-}
-
-float Image::Iy(int _i, int _j) const
-{
-    float up = getPixel(_i + 1, _j, EdgeMode::COPY);
-    float down = getPixel(_i - 1, _j, EdgeMode::COPY);
-    return up - down;
-}
+//float Image::Ix(int _i, int _j) const
+//{
+//    float left = getPixel(_i, _j - 1, EdgeMode::COPY);
+//    float right = getPixel(_i, _j + 1, EdgeMode::COPY);
+//    return right - left;
+//}
+//
+//float Image::Iy(int _i, int _j) const
+//{
+//    float up = getPixel(_i + 1, _j, EdgeMode::COPY);
+//    float down = getPixel(_i - 1, _j, EdgeMode::COPY);
+//    return up - down;
+//}
 
 vector<KeyPoint> Image::Harris(float _T, int _N) const
 {

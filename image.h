@@ -9,6 +9,7 @@
 #include <time.h>
 #include <mask.h>
 #include "maskfactory.h"
+#include <assert.h>
 using namespace std;
 
 enum class EdgeMode
@@ -76,8 +77,8 @@ private:
     const int height;
     const int width;
     vector<KeyPoint> FindLocalMax( float _T, int _N) const;
-    float Ix(int _i, int _j) const;
-    float Iy(int _i, int _j) const;
+   // float Ix(int _i, int _j) const;
+   // float Iy(int _i, int _j) const;
 
 };
 

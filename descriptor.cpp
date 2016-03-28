@@ -1,6 +1,6 @@
 #include "descriptor.h"
 
-Descriptor::Descriptor(vector<float> _vec, KeyPoint _point):
+Descriptor::Descriptor(const array<float, DescriptorDims> &_vec, KeyPoint _point):
     point(_point)
 {
     vec = _vec;
@@ -12,15 +12,12 @@ float Descriptor::get(int _num) const
     return vec[_num];
 }
 
-float Descriptor::dist(Descriptor d) const
+float Descriptor::dist(const Descriptor &d) const
 {
-    int len = length();
 
-    if(d.length() != len)
-        qFatal("Compare different descriptors");
 
     float sum = 0;
-    for(int i = 0; i < len; i++)
+    for(int i = 0; i < DescriptorDims; i++)
     {
         sum += (d.get(i) - get(i)) * (d.get(i) - get(i));
     }
@@ -31,9 +28,8 @@ float Descriptor::dist(Descriptor d) const
 
 void Descriptor::normalize()
 {
-    int len = length();
     float magn = magnitude();
-    for(int i = 0; i < len; i++)
+    for(int i = 0; i < DescriptorDims; i++)
     {
         vec[i] /= magn;
         if(vec[i] > 0.2)
@@ -41,7 +37,7 @@ void Descriptor::normalize()
     }
 
     magn = magnitude();
-    for(int i = 0; i < len; i++)
+    for(int i = 0; i < DescriptorDims; i++)
     {
         vec[i] /= magn;
     }
@@ -50,8 +46,7 @@ void Descriptor::normalize()
 float Descriptor::magnitude()   const
 {
     float sum = 0;
-    int len = length();
-    for(int i = 0; i < len; i++)
+    for(int i = 0; i < DescriptorDims; i++)
     {
         sum += get(i) * get(i);
     }

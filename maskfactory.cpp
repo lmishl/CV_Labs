@@ -51,6 +51,7 @@ pair<Mask,Mask> MaskFactory::GaussSeparated(float sigma)
 {
     int half = ceil(3*sigma);
     int size = 2 * half + 1;
+
     float sigma2 = sigma*sigma;
 
     pair<Mask,Mask> result (Mask(1,size), Mask(size,1));
