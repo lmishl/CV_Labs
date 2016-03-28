@@ -9,6 +9,7 @@
 #include <time.h>
 #include <mask.h>
 #include "maskfactory.h"
+#include <assert.h>
 using namespace std;
 
 enum class EdgeMode

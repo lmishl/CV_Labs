@@ -1,6 +1,5 @@
 #pragma once
 #include "image.h"
-#include <assert.h>
 static const unsigned GistSize = 4;
 static const unsigned GistNum = 4;
 static const unsigned BinNum = 8;

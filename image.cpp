@@ -55,6 +55,8 @@ QImage Image::toQImage() const
         for(int j=0; j<width; j++)
         {
             color = qRound(getPixel(i, j));
+            if(color>255)
+                color = 255;
             result.setPixel(j, i, qRgb(color,color,color));
         }
     }

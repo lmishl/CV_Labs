@@ -74,20 +74,15 @@ int main()
 {
     QString fileName1 = "C:\\4\\q1.png";
     shared_ptr<Image> myIm1 = Image::fromFile(fileName1);
-    myIm1 = myIm1->GaussFilterSep(0.8, EdgeMode::COPY);
+    myIm1 = myIm1->GaussFilter(0.5, EdgeMode::COPY);
     QString fileName2 = "C:\\4\\q2.png";
     shared_ptr<Image> myIm2 = Image::fromFile(fileName2);
     myIm2 = myIm2->GaussFilterSep(0.8, EdgeMode::COPY);
 
-
     vector<KeyPoint> points1 = myIm1->Harris(4, 100);//Moravec(0.02, 300);//
-
     vector<KeyPoint> points2 = myIm2->Harris(4, 100);// Moravec(0.02, 300);//
 
-    //myIm->addPoints(vec).save("C:\\1\\MoravecL.tif");
 
-    // vector<KeyPoint> vecH = myIm->Harris(4, 300);
-    //myIm->addPoints(vecH).save("C:\\1\\HarrisL.tif");
     myIm1->addPoints(points1).save("C:\\4\\Pq1.tif");
     myIm2->addPoints(points2).save("C:\\4\\Pq2.tif");
 
@@ -139,7 +134,5 @@ int main()
     unIm.save("C:\\4\\Un.png");
 
     cout<<"\ngood";
-
-
     return 0;
 }
