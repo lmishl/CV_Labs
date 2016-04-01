@@ -85,7 +85,6 @@ shared_ptr<Descriptor> DescriptorFactory::get(KeyPoint _p)
 
 pair<int, int> findMaxPair(const  array<float, AnglesBinNum> &_arr )
 {
-
     int res1 = 0, res2 = 1;
     float max1 = _arr[0];
     float max2 = _arr[1];
@@ -235,7 +234,7 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
                 //вычисляем соседнюю
                 int bin2 = bin1 + 1;
                 if(angle < b1Center)
-                    bin2  = bin1 - 1;
+                    bin2 = bin1 - 1;
                 //обрабатываем граничные случаи
                 bin2 = (bin2 + BinNum) % BinNum;
 
