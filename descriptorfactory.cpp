@@ -85,7 +85,6 @@ shared_ptr<Descriptor> DescriptorFactory::get(KeyPoint _p)
 
 pair<int, int> findMaxPair(const  array<float, AnglesBinNum> &_arr )
 {
-
     int res1 = 0, res2 = 1;
     float max1 = _arr[0];
     float max2 = _arr[1];
@@ -203,6 +202,9 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
         for(int i = 0; i < width; i++)
             for(int j = 0; j < height; j++)
             {
+                if(k== 2 && i ==73 && j==365)
+                    i=73;
+
                 auto temp = rotate(_points[k].x, _points[k].y, i, j, mainAngle);
 
                 float newX = temp.first;
@@ -213,7 +215,7 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
                 if(newX < x || newX > x + netSize || newY < y || newY > y + netSize)
                     continue;
 
-                newX -+ x;
+                newX -= x;
                 newY -= y;
 
                 //Узнаём в какую гистограмму попадает точка
@@ -227,6 +229,8 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
 
                 float weight = magnitudes->getPixel(i, j, EdgeMode::COPY);
                 float angle = angles->getPixel(i, j, EdgeMode::COPY) - mainAngle;
+                if(angle < 0)
+                    angle += 360;
 
                 //начинаем раскидывать по корзинам
                 int bin1 = angle / binSize;   // главная корзина
@@ -235,7 +239,7 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
                 //вычисляем соседнюю
                 int bin2 = bin1 + 1;
                 if(angle < b1Center)
-                    bin2  = bin1 - 1;
+                    bin2 = bin1 - 1;
                 //обрабатываем граничные случаи
                 bin2 = (bin2 + BinNum) % BinNum;
 
