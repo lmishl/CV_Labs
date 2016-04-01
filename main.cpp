@@ -74,13 +74,13 @@ int main()
 {
     QString fileName1 = "C:\\4\\q1.png";
     shared_ptr<Image> myIm1 = Image::fromFile(fileName1);
-    myIm1 = myIm1->GaussFilter(0.5, EdgeMode::COPY);
+    myIm1 = myIm1->GaussFilter(0.8, EdgeMode::COPY);
     QString fileName2 = "C:\\4\\q2.png";
     shared_ptr<Image> myIm2 = Image::fromFile(fileName2);
     myIm2 = myIm2->GaussFilterSep(0.8, EdgeMode::COPY);
 
     vector<KeyPoint> points1 = myIm1->Harris(4, 100);//Moravec(0.02, 300);//
-    vector<KeyPoint> points2 = myIm2->Harris(4, 100);// Moravec(0.02, 300);//
+    vector<KeyPoint> points2 = myIm2->Harris(4, 100);//Moravec(0.02, 300);//
 
 
     myIm1->addPoints(points1).save("C:\\4\\Pq1.tif");
@@ -90,17 +90,8 @@ int main()
     DescriptorFactory factory2(*myIm2);
 
     //получаем все дескрипторы
-    vector<Descriptor> descs1;
-    for(int i = 0; i < points1.size(); i++)
-    {
-        descs1.emplace_back(*factory1.get(points1[i]));
-    }
-
-    vector<Descriptor> descs2;
-    for(int i = 0; i < points2.size(); i++)
-    {
-        descs2.emplace_back(*factory2.get(points2[i]));
-    }
+    vector<Descriptor> descs1 = factory1.get(points1);
+    vector<Descriptor> descs2 = factory2.get(points2);
 
 
     QImage unIm = myIm1->Union(*myIm2);//save("C:\\4\\Un.png");
