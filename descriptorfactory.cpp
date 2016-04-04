@@ -144,6 +144,20 @@ pair<float, float> rotate(float x0, float y0, float x1, float y1, float angle)
     return pair<float, float>(newX,newY);
 }
 
+int myProc(int a, int b)
+{
+    return (a + b) % b;
+}
+
+float interpol(float x0, float x1, float x2, float y0, float y1, float y2)
+{
+    float a2 = (y2 - y0) / (x2 - x0) / (x2 - x1) - (y1 - y0) / (x1 - x0) / (x2 - x1);
+    float a1 = (y1 - y0) / (x1 - x0) - a2 * (x1 + x0);
+    float a0 = y0 - a1 * x0 - a2 * x0 * x0;
+
+    return -a1 / 2 / a2;
+}
+
 
 vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
 {
@@ -193,18 +207,20 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
                 anglesArr[bin1] += w1;
                 anglesArr[bin2] += w2;
             }
-        int mainAngleInd = findMaxPair(anglesArr).first;       //главное направление------------------------дописать второе
-        float mainAngle = mainAngleInd * anglesBinSize  + anglesBinSize / 2;
+        int mainBin = findMaxPair(anglesArr).first;       //индекс главной корзины------------------------дописать второе
+        //теперь интерполируем чтобы найти главное направление
+        float angle0 = mainBin * anglesBinSize  - anglesBinSize / 2;
+        float angle1 = mainBin * anglesBinSize  + anglesBinSize / 2;
+        float angle2 = mainBin * anglesBinSize  + anglesBinSize * 3 / 2;
+
+        float mainAngle = interpol(angle0,angle1,angle2, anglesArr[myProc(mainBin - 1,BinNum)], anglesArr[mainBin],anglesArr[myProc(mainBin + 1,BinNum)] );
 
         int width = angles->getWidth();
         int height = angles->getHeight();
         //Итоговое распределение по корзинам
-        for(int i = 0; i < width; i++)
-            for(int j = 0; j < height; j++)
+        for(int i = _points[k].x - netSize; i < _points[k].x + netSize; i++)
+            for(int j = _points[k].y - netSize; j < _points[k].y + netSize; j++)
             {
-                if(k== 2 && i ==73 && j==365)
-                    i=73;
-
                 auto temp = rotate(_points[k].x, _points[k].y, i, j, mainAngle);
 
                 float newX = temp.first;

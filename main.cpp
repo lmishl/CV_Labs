@@ -74,10 +74,10 @@ int main()
 {
     QString fileName1 = "C:\\4\\q1.png";
     shared_ptr<Image> myIm1 = Image::fromFile(fileName1);
-    myIm1 = myIm1->GaussFilter(0.8, EdgeMode::COPY);
+    myIm1 = myIm1->GaussFilter(0.5, EdgeMode::COPY);
     QString fileName2 = "C:\\4\\q2.png";
     shared_ptr<Image> myIm2 = Image::fromFile(fileName2);
-    myIm2 = myIm2->GaussFilterSep(0.8, EdgeMode::COPY);
+    myIm2 = myIm2->GaussFilterSep(0.5, EdgeMode::COPY);
 
     vector<KeyPoint> points1 = myIm1->Harris(4, 100);//Moravec(0.02, 300);//
     vector<KeyPoint> points2 = myIm2->Harris(4, 100);//Moravec(0.02, 300);//
@@ -115,6 +115,8 @@ int main()
         KeyPoint left = descs1[i].getPoint();
         KeyPoint right = descs2[close1].getPoint();
         //кароче рисуем
+        QPen qqq(QColor(rand() %255, rand() %255,rand() %255 ));
+         painter.setPen(qqq);
         painter.drawLine(QPoint(left.y, left.x), QPoint(right.y + myIm1->getWidth(), right.x));
 
 

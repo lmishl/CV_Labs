@@ -406,12 +406,13 @@ QImage Image::Union(const Image &rightIm) const
 {
     QImage left = toQImage();
     QImage right = rightIm.toQImage();
+    int h = max(left.height(), right.height());
 
-    QImage destImage( width * 2, height, QImage::Format_RGB32 );
+    QImage destImage( left.width() + right.width(), h, QImage::Format_RGB32 );
     QPainter painter;
     painter.begin(&destImage);
     painter.drawImage(QPoint(0,0), left);
-    painter.drawImage(QPoint(width,0), right);
+    painter.drawImage(QPoint(left.width(),0), right);
     painter.end();
     return destImage;
 }
