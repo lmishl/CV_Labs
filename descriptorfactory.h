@@ -1,7 +1,7 @@
 #pragma once
 #include "image.h"
 #include "descriptor.h"
-static const unsigned AnglesBinNum = 8;
+static const unsigned AnglesBinNum = 36;
 
 class DescriptorFactory
 {

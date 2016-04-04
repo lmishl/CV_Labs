@@ -55,7 +55,7 @@ public:
     float setPixel(int i, int j, float value);
 
     int getHeight() const;
-    int getWidth() const;\
+    int getWidth() const;
 
     shared_ptr<Image> normalize() const;
     shared_ptr<Image> ot0do1() const;
