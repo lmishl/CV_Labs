@@ -12,4 +12,6 @@ public:
 private:
     unique_ptr<Image> magnitudes;
     unique_ptr<Image> angles;
+    array<float, AnglesBinNum> findAngleBins(int x, int netSize, int y, float anglesBinSize);
+    array<float, DescriptorDims> getFinalBins(const KeyPoint _point, int netSize, float mainAngle, int y, int x, float binSize);
 };
