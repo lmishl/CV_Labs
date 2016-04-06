@@ -275,8 +275,7 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
         float angle2 = bin1 * anglesBinSize + anglesBinSize * 3 / 2;
 
         float mainAngle = interpol(angle0,angle1,angle2, anglesArr[myProc(bin1 - 1,BinNum)], anglesArr[bin1],anglesArr[myProc(bin1 + 1,BinNum)] );
-        if(mainAngle > 360 || mainAngle < 0)
-            qFatal("sdgdrg");
+
         //Итоговое распределение по корзинам
         array<float, DescriptorDims> arr = getFinalBins(_points[k], netSize, mainAngle, y, x, binSize);
         res.emplace_back(arr, _points[k]);
