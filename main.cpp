@@ -68,6 +68,11 @@ pair<int, int> findClosestPair(Descriptor _p, vector<Descriptor> _vec)
     return pair<int, int>(res1, res2);
 }
 
+shared_ptr<Pyramid> findBlobs(const Image& _im)
+{
+    Pyramid pyr(_im);
+
+}
 
 
 int main()
@@ -115,7 +120,7 @@ int main()
         KeyPoint left = descs1[i].getPoint();
         KeyPoint right = descs2[close1].getPoint();
         //кароче рисуем
-        QPen qqq(QColor(rand() %255, rand() %255,rand() %255 ));
+        QPen qqq(QColor(rand() % 255, rand() % 255, rand() % 255));
         painter.setPen(qqq);
         painter.drawLine(QPoint(left.y, left.x), QPoint(right.y + myIm1->getWidth(), right.x));
 

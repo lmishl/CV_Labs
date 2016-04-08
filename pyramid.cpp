@@ -1,39 +1,56 @@
 #include "pyramid.h"
 
-Pyramid::Pyramid(const Image& _im, float _sigma0, int _numLevels, EdgeMode _mode)
+Pyramid::Pyramid(const Image& _im)
 {
-    sigma0 = _sigma0;
-    numLevels = _numLevels;
-
     int minS = min(_im.getHeight(), _im.getWidth());
     numOctave = log2(minS) - 5;      //строим новую октаву пока изображение не станет меньше 64
 
-    //досглаживаем до sigma0
-    MaskFactory factory;
-    float deltaSigma = sqrt(sigma0 * sigma0 - 0.25);
-    shared_ptr<Image> curIm = _im.GaussFilterSep(deltaSigma, _mode);
+    //досглаживаем до Sigma0
+    float deltaSigma = sqrt(Sigma0 * Sigma0 - 0.25);
+    shared_ptr<Image> curIm = _im.GaussFilterSep(deltaSigma, EdgeMode::COPY);
 
     //начинаем вычислять октавы
-    k = pow(2,1./_numLevels);
+    k = pow(2,1./NumLevels);
 
     for(int i = 0; i < numOctave; i++ )
     {
-        PyramidLevel level(sigma0, k, i);
+        PyramidLevel level(Sigma0, k, i);
         level.add(curIm);
-        float curSigma = sigma0;
-        for(int j = 0; j < _numLevels; j++)
+        float curSigma = Sigma0;
+        for(int j = 0; j < NumLevels + 1; j++)
         {
             float newSigma = curSigma * k;
             float deltaSigma = sqrt(newSigma * newSigma - curSigma * curSigma);
 
-            curIm = curIm->GaussFilterSep(deltaSigma, _mode);
+            curIm = curIm->GaussFilterSep(deltaSigma,  EdgeMode::COPY);
             level.add(curIm);
             curSigma = newSigma;
         }
-        curIm = curIm->DownScale();
+        curIm = level.get(NumLevels)->DownScale();
         vec.emplace_back(level);
     }
 
+}
+
+Pyramid::Pyramid(int _numOctave, float _k)
+{
+    numOctave = _numOctave;
+    k = _k;
+
+}
+
+
+shared_ptr<Pyramid> Pyramid::getDOG() const
+{
+    shared_ptr<Pyramid> res = make_shared<Pyramid>(numOctave, k);
+
+    for(int i = 0; i < numOctave; i++ )
+    {
+        PyramidLevel dogLevel = *vec[i].getDOGLevel();
+        res->vec.emplace_back(dogLevel);
+    }
+
+    return res;
 }
 
 void Pyramid::output(const QString &dirName) const
@@ -56,4 +73,18 @@ float Pyramid::L(int _x, int _y, float _sigma) const
         level++;
     level--;
     return vec[level].L(_x, _y, _sigma);
+}
+
+
+
+vector<KeyPoint> Pyramid::findExtemums() const
+{
+    vector<KeyPoint> result;
+
+    for(int i = 0; i < numOctave; i++)
+    {
+       vector<KeyPoint> points = vec[i].findExtemums();
+       result.insert(result.end(),points.begin(),points.end());
+    }
+    return result;
 }

@@ -13,6 +13,8 @@ public:
     float localSigma(int i) const;
     int getNumber() const;
     float L(int _x, int _y, float _sigma) const;
+    shared_ptr<PyramidLevel> getDOGLevel() const;
+    vector<KeyPoint> findExtemums() const;
 private:
     vector<shared_ptr<Image>> vec;
     int number;     //номер октавы

@@ -70,7 +70,7 @@ public:
     QImage Union(const Image &rightIm) const;
 
 
-
+    shared_ptr<Image> minus(const Image &rightIm) const;
 
 private:
     const unique_ptr<float[]> image;

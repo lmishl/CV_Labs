@@ -416,3 +416,17 @@ QImage Image::Union(const Image &rightIm) const
     painter.end();
     return destImage;
 }
+
+shared_ptr<Image> Image::minus(const Image &rightIm) const
+{
+    shared_ptr<Image> result = make_shared<Image>(height, width);
+
+    for(int i = 0; i < height; i++)
+
+        for(int j = 0; j < width; j++)
+        {
+            float val = getPixel(i, j) - rightIm.getPixel(i, j);
+            result->setPixel(i, j, val);
+        }
+    return result;
+}
