@@ -68,21 +68,61 @@ vector<KeyPoint> PyramidLevel::findExtemums() const
     int h = vec[0]->getHeight();
     vector<KeyPoint> res;
 
-    for(int k = 1; k < vec.size() - 1; k++)
+    for(int q = 1; q < vec.size() - 1; q++)
     {
         for(int i = 1; i < w - 1; i++)
         {
             for(int j = 1; j < h - 1; j++)
             {
-                if(isExtremum(k, i, j))
-                    res.emplace_back()
+                if(isExtremum(q, i, j))
+                    res.emplace_back(i, j, globalSigma(q));
             }
         }
     }
 }
 
 
-bool isExtremum(int _k, int _i, int _j)
+bool PyramidLevel::isExtremum(int _q, int _i, int _j) const
 {
+    float mas[26];
+    //низ
+    mas[0] = vec[_q - 1]->getPixel(_i - 1, _j - 1);
+    mas[1] = vec[_q - 1]->getPixel(_i - 1, _j);
+    mas[2] = vec[_q - 1]->getPixel(_i - 1, _j + 1);
+    mas[3] = vec[_q - 1]->getPixel(_i, _j - 1);
+    mas[4] = vec[_q - 1]->getPixel(_i, _j);
+    mas[5] = vec[_q - 1]->getPixel(_i, _j + 1);
+    mas[6] = vec[_q - 1]->getPixel(_i + 1, _j - 1);
+    mas[7] = vec[_q - 1]->getPixel(_i + 1, _j);
+    mas[8] = vec[_q - 1]->getPixel(_i + 1, _j + 1);
+    //середина
+     mas[9] = vec[_q]->getPixel(_i - 1, _j - 1);
+    mas[10] = vec[_q]->getPixel(_i - 1, _j);
+    mas[11] = vec[_q]->getPixel(_i - 1, _j + 1);
+    mas[12] = vec[_q]->getPixel(_i, _j - 1);
+    mas[13] = vec[_q]->getPixel(_i, _j + 1);
+    mas[14] = vec[_q]->getPixel(_i + 1, _j - 1);
+    mas[15] = vec[_q]->getPixel(_i + 1, _j);
+    mas[16] = vec[_q]->getPixel(_i + 1, _j + 1);
+    //верх
+    mas[17] = vec[_q + 1]->getPixel(_i - 1, _j - 1);
+    mas[18] = vec[_q + 1]->getPixel(_i - 1, _j);
+    mas[19] = vec[_q + 1]->getPixel(_i - 1, _j + 1);
+    mas[20] = vec[_q + 1]->getPixel(_i, _j - 1);
+    mas[21] = vec[_q + 1]->getPixel(_i, _j);
+    mas[22] = vec[_q + 1]->getPixel(_i, _j + 1);
+    mas[23] = vec[_q + 1]->getPixel(_i + 1, _j - 1);
+    mas[24] = vec[_q + 1]->getPixel(_i + 1, _j);
+    mas[25] = vec[_q + 1]->getPixel(_i + 1, _j + 1);
 
+    auto mm = minmax_element(mas,&mas[25]);
+    float min = * mm.first;
+    float max = * mm.second;
+
+    float val = vec[_q]->getPixel(_i, _j);
+    if(val > max)
+        return true;
+    if(val < min)
+        return true;
+    return false;
 }
