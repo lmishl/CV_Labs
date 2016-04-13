@@ -79,9 +79,9 @@ vector<KeyPoint> PyramidLevel::findExtemums() const
 
     for(int q = 1; q < vec.size() - 1; q++)
     {
-        for(int i = 1; i < w - 1; i++)
+        for(int i = 1; i < h - 1; i++)
         {
-            for(int j = 1; j < h - 1; j++)
+            for(int j = 1; j < w - 1; j++)
             {
                 if(isExtremum(q, i, j))
                 {
@@ -133,9 +133,9 @@ bool PyramidLevel::isExtremum(int _q, int _i, int _j) const
     float max = * mm.second;
 
     float val = vec[_q]->getPixel(_i, _j);
-    if(val > max)
+    if(val > max + 0.0001)
         return true;
-    if(val < min)
+    if(val < min - 0.0001)
         return true;
     return false;
 }

@@ -114,6 +114,7 @@ vector<KeyPoint> findBlobs(const Image& _im, float T)
 {
     unsigned int start_time =  clock(); // начальное время
     Pyramid pyr(_im);
+    cout<<"\nPyr "<< (int)clock() - start_time;
     vector<KeyPoint> res;
     vector<KeyPoint> blobs = pyr.getDOG()->findExtemums();
     cout<<"\nDOG "<< (int)clock() - start_time;
@@ -143,14 +144,14 @@ int main()
     //myIm2 = myIm2->GaussFilterSep(0.5, EdgeMode::COPY);
 
 
-    vector<KeyPoint> points1 = findBlobs(*myIm1, 2);
-    //vector<KeyPoint> points2 = findBlobs(*myIm2,4);
+    vector<KeyPoint> points1 = findBlobs(*myIm1, 0);
+    vector<KeyPoint> points2 = findBlobs(*myIm2, 0);
     //vector<KeyPoint> points1 = myIm1->Harris(3, 100);//Moravec(0.02, 300);//
     //vector<KeyPoint> points2 = myIm2->Harris(3, 100);//Moravec(0.02, 300);//
     //
     //
-    //myIm1->addPoints(points1).save("C:\\6\\Pq1.tif");
-    //myIm2->addPoints(points2).save("C:\\6\\Pq2.tif");
+    myIm1->addPoints(points1).save("C:\\6\\Pq1.tif");
+    myIm2->addPoints(points2).save("C:\\6\\Pq2.tif");
     //
     //DescriptorFactory factory1(*myIm1);
     //DescriptorFactory factory2(*myIm2);

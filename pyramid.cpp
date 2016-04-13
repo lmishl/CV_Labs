@@ -15,7 +15,7 @@ Pyramid::Pyramid(const Image& _im)
     for(int i = 0; i < numOctave; i++ )
     {
         PyramidLevel level(Sigma0, k, i);
-        level.add(curIm);
+        level.add(curIm->ot0do1());
         float curSigma = Sigma0;
         for(int j = 0; j < NumLevels + 1; j++)
         {
@@ -23,7 +23,7 @@ Pyramid::Pyramid(const Image& _im)
             float deltaSigma = sqrt(newSigma * newSigma - curSigma * curSigma);
 
             curIm = curIm->GaussFilterSep(deltaSigma,  EdgeMode::COPY);
-            level.add(curIm);
+            level.add(curIm->ot0do1());
             curSigma = newSigma;
         }
         curIm = level.get(NumLevels)->DownScale();

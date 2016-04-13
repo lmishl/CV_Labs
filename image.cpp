@@ -398,13 +398,7 @@ float Image::HarrisForPoint(KeyPoint _p) const
     int heightW = 5, widthW = 5;
     float k = 0.06;
 
-    //shared_ptr<Image> working = ot0do1();
-
-   // MaskFactory factory;
-    //shared_ptr<Image> gradX = working->convolution(factory.SobelX(), EdgeMode::COPY);
-    //  gradX->toFile("C:\\1\\gradX.tif");
-    //shared_ptr<Image> gradY = working->convolution(factory.SobelY(), EdgeMode::COPY);
-    // gradY->toFile("C:\\1\\gradY.tif");
+    //shared_ptr<Image> working = ot0do1();             //Надо добавить!!!!!!!!!!!!!!!!!!!
 
     float a = 0, b = 0, c = 0;
 
@@ -427,8 +421,6 @@ float Image::HarrisForPoint(KeyPoint _p) const
     float curF = det - k * trace * trace;
 
     return curF;
-
-
 }
 
 QImage Image::addPoints(vector<KeyPoint> _vec) const
@@ -437,10 +429,15 @@ QImage Image::addPoints(vector<KeyPoint> _vec) const
     int size = _vec.size();
     for(int i = 0; i < size; i++)
     {
-        res.setPixel(_vec[i].y, _vec[i].x + 1, qRgb(255,0,0));
-        res.setPixel(_vec[i].y, _vec[i].x - 1, qRgb(255,0,0));
-        res.setPixel(_vec[i].y + 1, _vec[i].x, qRgb(255,0,0));
-        res.setPixel(_vec[i].y - 1, _vec[i].x, qRgb(255,0,0));
+        int number = log2(_vec[i].sigma / 1.6);
+        int x = _vec[i].x * pow(2, number);
+        int y = _vec[i].y * pow(2, number);
+
+
+        res.setPixel(y, x + 1, qRgb(255,0,0));
+        res.setPixel(y, x - 1, qRgb(255,0,0));
+        res.setPixel(y + 1, x, qRgb(255,0,0));
+        res.setPixel(y - 1, x, qRgb(255,0,0));
 
     }
 
