@@ -68,12 +68,68 @@ pair<int, int> findClosestPair(Descriptor _p, vector<Descriptor> _vec)
     return pair<int, int>(res1, res2);
 }
 
-shared_ptr<Pyramid> findBlobs(const Image& _im)
+vector<KeyPoint> findBlobs(const Image& _im, float T)
 {
     Pyramid pyr(_im);
+    vector<KeyPoint> res;
+    vector<KeyPoint> blobs = pyr.getDOG()->findExtemums();
+    for(int i = 0; i < blobs.size(); i++)
+    {
+        if(_im.HarrisForPoint(blobs[i]) > T)
+        {
+            res.emplace_back(blobs[i]);
+        }
 
+    }
+
+
+    return res;
 }
 
+vector<pair<KeyPoint, KeyPoint>> FindMatches(vector<Descriptor> descs1, vector<Descriptor> descs2)
+{
+   vector<pair<KeyPoint, KeyPoint>> res;
+    for(int i = 0; i < descs1.size(); i++)
+    {
+        auto min = findClosestPair(descs1[i], descs2);
+        int close1 = min.first;
+        int close2 = min.second;
+
+        float dist1 = descs1[i].dist(descs2[close1]);
+        float dist2 = descs1[i].dist(descs2[close2]);
+
+        if(dist1 / dist2 > 0.8)
+            continue;       //ненадёжно
+
+        res.emplace_back(descs1[i].getPoint(), descs2[close1].getPoint());
+    }
+    return res;
+}
+
+void DrawMatches(const Image &_im1, const Image &_im2, vector<pair<KeyPoint, KeyPoint>> _matches, const QString &_fileName)
+{
+    QImage unIm = _im1.Union(_im2);//save("C:\\4\\Un.png");
+    QPainter painter;
+    painter.begin(&unIm);
+    painter.setPen(Qt::darkCyan);
+
+    for(int i = 0; i < _matches.size(); i++)
+    {
+
+        KeyPoint left = _matches[i].first;
+        KeyPoint right = _matches[i].second;
+        //кароче рисуем
+        QPen qqq(QColor(rand() % 255, rand() % 255, rand() % 255));
+        painter.setPen(qqq);
+        painter.drawLine(QPoint(left.y, left.x), QPoint(right.y + _im1.getWidth(), right.x));
+
+
+    }
+    painter.end();
+
+
+    unIm.save("C:\\4\\Un.png");
+}
 
 int main()
 {
@@ -99,37 +155,9 @@ int main()
     vector<Descriptor> descs2 = factory2.get(points2);
 
 
-    QImage unIm = myIm1->Union(*myIm2);//save("C:\\4\\Un.png");
-    QPainter painter;
-    painter.begin(&unIm);
-    painter.setPen(Qt::darkCyan);
-    //ищем пары
-    for(int i = 0; i < descs1.size(); i++)
-    {
-        auto min = findClosestPair(descs1[i], descs2);
-        int close1 = min.first;
-        int close2 = min.second;
+    vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
+    DrawMatches(*myIm1, *myIm2, matches, "C:\\4\\Un.png");
 
-        float dist1 = descs1[i].dist(descs2[close1]);
-        float dist2 = descs1[i].dist(descs2[close2]);
-
-        if(dist1 / dist2 > 0.8)
-            continue;       //ненадёжно
-
-
-        KeyPoint left = descs1[i].getPoint();
-        KeyPoint right = descs2[close1].getPoint();
-        //кароче рисуем
-        QPen qqq(QColor(rand() % 255, rand() % 255, rand() % 255));
-        painter.setPen(qqq);
-        painter.drawLine(QPoint(left.y, left.x), QPoint(right.y + myIm1->getWidth(), right.x));
-
-
-    }
-    painter.end();
-
-
-    unIm.save("C:\\4\\Un.png");
 
     cout<<"\ngood";
     return 0;

@@ -69,6 +69,12 @@ bool Image::toFile(const QString &fileName) const
     return image.save(fileName, "JPEG");
 }
 
+
+float Image::getPixel(KeyPoint _p, EdgeMode _mode) const
+{
+    return getPixel(_p.x, _p.y, _mode);
+}
+
 float Image::getPixel(int i, int j, EdgeMode mode) const
 {
     if(i<height && j<width && i>=0 && j>=0)
@@ -240,7 +246,7 @@ vector<KeyPoint> Image::FindLocalMax( float _T, int _N) const
                     }
                 }
             if (isLocalMax)
-                res.emplace_back(i, j, curV);
+                res.emplace_back(i, j, curV, 0);
         }
 
 
@@ -357,9 +363,9 @@ vector<KeyPoint> Image::Harris(float _T, int _N) const
     //теперь знаем а б и с в каждой точке
 
 
-    A.toFile("C:\\1\\A.tif");
-    B.toFile("C:\\1\\B.tif");
-    C.toFile("C:\\1\\C.tif");
+    // A.toFile("C:\\1\\A.tif");
+    // B.toFile("C:\\1\\B.tif");
+    // C.toFile("C:\\1\\C.tif");
 
 
 
@@ -379,10 +385,60 @@ vector<KeyPoint> Image::Harris(float _T, int _N) const
             F.setPixel(i, j, curF);
         }
     vector<KeyPoint> qq = F.FindLocalMax(_T, _N);
-    F.normalize();
-    F.toFile("C:\\1\\F.tif");
+    // F.normalize();
+    //  F.toFile("C:\\1\\F.tif");
 
     return qq;
+}
+
+
+
+float Image::HarrisForPoint(KeyPoint _p) const
+{
+    int heightW = 5, widthW = 5;
+    float k = 0.06;
+    shared_ptr<Image> working = GaussFilterSep(_p.sigma, EdgeMode::MIRROR);
+    working = working->ot0do1();
+
+    MaskFactory factory;
+    shared_ptr<Image> gradX = working->convolution(factory.SobelX(), EdgeMode::COPY);
+    gradX->toFile("C:\\1\\gradX.tif");
+    shared_ptr<Image> gradY = working->convolution(factory.SobelY(), EdgeMode::COPY);
+    gradY->toFile("C:\\1\\gradY.tif");
+    Image A(height, width), B(height, width), C(height, width);
+    for(int i = 0; i < height; i++)
+        for(int j = 0; j < width; j++)
+        {
+            float a = 0, b = 0, c = 0;
+
+            for(int dy = - heightW/2; dy < heightW/2; dy++)
+                for(int dx = -widthW/2; dx < widthW/2; dx++)
+                {
+                    float x = gradX->getPixel(i + dy, j + dx);
+                    float y = gradY->getPixel(i + dy, j + dx);
+                    a += x * x;
+                    b += x * y;
+                    c += y * y;
+                }
+
+            A.setPixel(i, j, a);
+            B.setPixel(i, j, b);
+            C.setPixel(i, j, c);
+        }
+    //теперь знаем а б и с в каждой точке
+
+
+    float a = A.getPixel(_p);
+    float b = B.getPixel(_p);
+    float c = C.getPixel(_p);
+
+    float det = a * c - b * b;
+    float trace = a + c;
+    float curF = det - k * trace * trace;
+
+    return curF;
+
+
 }
 
 QImage Image::addPoints(vector<KeyPoint> _vec) const
@@ -400,6 +456,8 @@ QImage Image::addPoints(vector<KeyPoint> _vec) const
 
     return res;
 }
+
+
 
 
 QImage Image::Union(const Image &rightIm) const

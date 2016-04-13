@@ -22,11 +22,12 @@ enum class EdgeMode
 struct KeyPoint
 {
     int x,y;
-    float val;
-    KeyPoint(int _x, int _y, float _val)
+    float sigma, val;
+    KeyPoint(int _x, int _y, float _val, float _sigma)
     {
         x = _x;
         y = _y;
+        sigma = _sigma;
         val = _val;
     }
 
@@ -51,7 +52,8 @@ public:
     QImage toQImage() const;
     bool toFile(const QString &fileName)const;
 
-    float getPixel(int i, int j, EdgeMode mode=EdgeMode::ZEROS) const;
+    float getPixel(int i, int j, EdgeMode mode=EdgeMode::COPY) const;
+    float getPixel(KeyPoint _p, EdgeMode _mode=EdgeMode::COPY) const;
     float setPixel(int i, int j, float value);
 
     int getHeight() const;
@@ -65,6 +67,7 @@ public:
 
     vector<KeyPoint> Moravec(float _T, int _N) const;
     vector<KeyPoint> Harris(float _T, int _N) const;
+    float HarrisForPoint(KeyPoint _p) const;
     QImage addPoints(vector<KeyPoint> _vec) const;
 
     QImage Union(const Image &rightIm) const;

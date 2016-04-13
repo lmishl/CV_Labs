@@ -75,10 +75,14 @@ vector<KeyPoint> PyramidLevel::findExtemums() const
             for(int j = 1; j < h - 1; j++)
             {
                 if(isExtremum(q, i, j))
-                    res.emplace_back(i, j, globalSigma(q));
+                {
+                    //int ii пересчитывать координаты
+                    res.emplace_back(i, j, 0, globalSigma(q));
+                }
             }
         }
     }
+    return res;
 }
 
 

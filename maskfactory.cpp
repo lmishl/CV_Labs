@@ -62,7 +62,7 @@ pair<Mask,Mask> MaskFactory::GaussSeparated(float sigma)
 
         value = (pow(M_E,-(i*i)/(2*sigma2)))/(sqrt(2*M_PI)*sigma);
         result.first.set(0, i + half, value);
-        result.second.set(i+ half, 0, value);
+        result.second.set(i + half, 0, value);
     }
 
     return result;
