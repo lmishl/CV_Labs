@@ -52,8 +52,10 @@ public:
     QImage toQImage() const;
     bool toFile(const QString &fileName)const;
 
-    float getPixel(int i, int j, EdgeMode mode=EdgeMode::COPY) const;
+    float getPixel(int i, int j, EdgeMode _mode=EdgeMode::COPY) const;
     float getPixel(KeyPoint _p, EdgeMode _mode=EdgeMode::COPY) const;
+    float gradX(int i, int j, EdgeMode _mode=EdgeMode::COPY) const;
+    float gradY(int i, int j, EdgeMode _mode=EdgeMode::COPY) const;
     float setPixel(int i, int j, float value);
 
     int getHeight() const;
@@ -68,7 +70,7 @@ public:
     vector<KeyPoint> Moravec(float _T, int _N) const;
     vector<KeyPoint> Harris(float _T, int _N) const;
     float HarrisForPoint(KeyPoint _p) const;
-    QImage addPoints(vector<KeyPoint> _vec) const;
+    QImage addPoints(vector<KeyPoint> _vec) const;   
 
     QImage Union(const Image &rightIm) const;
 

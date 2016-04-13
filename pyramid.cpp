@@ -75,6 +75,14 @@ float Pyramid::L(int _x, int _y, float _sigma) const
     return vec[level].L(_x, _y, _sigma);
 }
 
+shared_ptr<Image> Pyramid::getImage(float _sigma) const
+{
+    int level = 1;
+    while(vec[level].globalSigma(0) < _sigma && level < vec.size())
+        level++;
+    level--;
+    return vec[level].getFromSigma(_sigma);
+}
 
 
 vector<KeyPoint> Pyramid::findExtemums() const
@@ -83,8 +91,8 @@ vector<KeyPoint> Pyramid::findExtemums() const
 
     for(int i = 0; i < numOctave; i++)
     {
-       vector<KeyPoint> points = vec[i].findExtemums();
-       result.insert(result.end(),points.begin(),points.end());
+        vector<KeyPoint> points = vec[i].findExtemums();
+        result.insert(result.end(),points.begin(),points.end());
     }
     return result;
 }

@@ -8,6 +8,7 @@ public:
     PyramidLevel(float _sigma, float _k, int _number);
     void add(const shared_ptr<Image> &_im);
     shared_ptr<Image> get(int i) const;
+    shared_ptr<Image> getFromSigma(float _sigma) const;
     int size() const;
     float globalSigma(int i) const;
     float localSigma(int i) const;

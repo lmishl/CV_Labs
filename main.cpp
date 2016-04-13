@@ -70,7 +70,7 @@ pair<int, int> findClosestPair(Descriptor _p, vector<Descriptor> _vec)
 
 vector<pair<KeyPoint, KeyPoint>> FindMatches(vector<Descriptor> descs1, vector<Descriptor> descs2)
 {
-   vector<pair<KeyPoint, KeyPoint>> res;
+    vector<pair<KeyPoint, KeyPoint>> res;
     for(int i = 0; i < descs1.size(); i++)
     {
         auto min = findClosestPair(descs1[i], descs2);
@@ -112,12 +112,15 @@ void DrawMatches(const Image &_im1, const Image &_im2, vector<pair<KeyPoint, Key
 
 vector<KeyPoint> findBlobs(const Image& _im, float T)
 {
+    unsigned int start_time =  clock(); // начальное время
     Pyramid pyr(_im);
     vector<KeyPoint> res;
     vector<KeyPoint> blobs = pyr.getDOG()->findExtemums();
+    cout<<"\nDOG "<< (int)clock() - start_time;
     for(int i = 0; i < blobs.size(); i++)
     {
-        if(_im.HarrisForPoint(blobs[i]) > T)
+
+        if(pyr.getImage(blobs[i].sigma)->HarrisForPoint(blobs[i]) > T)
         {
             res.emplace_back(blobs[i]);
         }
@@ -131,32 +134,36 @@ vector<KeyPoint> findBlobs(const Image& _im, float T)
 
 int main()
 {
+    unsigned int start_time =  clock(); // начальное время
     QString fileName1 = "C:\\6\\p1.png";
     shared_ptr<Image> myIm1 = Image::fromFile(fileName1);
-    myIm1 = myIm1->GaussFilter(0.5, EdgeMode::COPY);
+    //myIm1 = myIm1->GaussFilter(0.5, EdgeMode::COPY);
     QString fileName2 = "C:\\6\\p2.png";
     shared_ptr<Image> myIm2 = Image::fromFile(fileName2);
-    myIm2 = myIm2->GaussFilterSep(0.5, EdgeMode::COPY);
-
-    vector<KeyPoint> points1 = myIm1->Harris(4, 100);//Moravec(0.02, 300);//
-    vector<KeyPoint> points2 = myIm2->Harris(4, 100);//Moravec(0.02, 300);//
+    //myIm2 = myIm2->GaussFilterSep(0.5, EdgeMode::COPY);
 
 
-    myIm1->addPoints(points1).save("C:\\6\\Pq1.tif");
-    myIm2->addPoints(points2).save("C:\\6\\Pq2.tif");
+    vector<KeyPoint> points1 = findBlobs(*myIm1, 2);
+    //vector<KeyPoint> points2 = findBlobs(*myIm2,4);
+    //vector<KeyPoint> points1 = myIm1->Harris(3, 100);//Moravec(0.02, 300);//
+    //vector<KeyPoint> points2 = myIm2->Harris(3, 100);//Moravec(0.02, 300);//
+    //
+    //
+    //myIm1->addPoints(points1).save("C:\\6\\Pq1.tif");
+    //myIm2->addPoints(points2).save("C:\\6\\Pq2.tif");
+    //
+    //DescriptorFactory factory1(*myIm1);
+    //DescriptorFactory factory2(*myIm2);
+    //
+    ////получаем все дескрипторы
+    //vector<Descriptor> descs1 = factory1.get(points1);
+    //vector<Descriptor> descs2 = factory2.get(points2);
+    //
+    //
+    //vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
+    //DrawMatches(*myIm1, *myIm2, matches, "C:\\6\\Un.png");
 
-    DescriptorFactory factory1(*myIm1);
-    DescriptorFactory factory2(*myIm2);
-
-    //получаем все дескрипторы
-    vector<Descriptor> descs1 = factory1.get(points1);
-    vector<Descriptor> descs2 = factory2.get(points2);
-
-
-    vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
-    DrawMatches(*myIm1, *myIm2, matches, "C:\\6\\Un.png");
-
-
-    cout<<"\ngood";
+    unsigned int search_time = (int)clock() - start_time; // искомое время
+    cout<<"\ngood "<< search_time;
     return 0;
 }

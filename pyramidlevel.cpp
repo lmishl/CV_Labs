@@ -18,6 +18,15 @@ shared_ptr<Image> PyramidLevel::get(int i) const
     return vec[i];
 }
 
+shared_ptr<Image> PyramidLevel::getFromSigma(float _sigma) const
+{
+    int level = 1;
+    while(globalSigma(level) < _sigma && level < vec.size())
+        level++;
+    level--;
+    return vec[level];
+}
+
 int PyramidLevel::size() const
 {
     return vec.size();
