@@ -68,24 +68,6 @@ pair<int, int> findClosestPair(Descriptor _p, vector<Descriptor> _vec)
     return pair<int, int>(res1, res2);
 }
 
-vector<KeyPoint> findBlobs(const Image& _im, float T)
-{
-    Pyramid pyr(_im);
-    vector<KeyPoint> res;
-    vector<KeyPoint> blobs = pyr.getDOG()->findExtemums();
-    for(int i = 0; i < blobs.size(); i++)
-    {
-        if(_im.HarrisForPoint(blobs[i]) > T)
-        {
-            res.emplace_back(blobs[i]);
-        }
-
-    }
-
-
-    return res;
-}
-
 vector<pair<KeyPoint, KeyPoint>> FindMatches(vector<Descriptor> descs1, vector<Descriptor> descs2)
 {
    vector<pair<KeyPoint, KeyPoint>> res;
@@ -115,28 +97,44 @@ void DrawMatches(const Image &_im1, const Image &_im2, vector<pair<KeyPoint, Key
 
     for(int i = 0; i < _matches.size(); i++)
     {
-
         KeyPoint left = _matches[i].first;
         KeyPoint right = _matches[i].second;
         //кароче рисуем
         QPen qqq(QColor(rand() % 255, rand() % 255, rand() % 255));
         painter.setPen(qqq);
         painter.drawLine(QPoint(left.y, left.x), QPoint(right.y + _im1.getWidth(), right.x));
-
-
     }
     painter.end();
 
 
-    unIm.save("C:\\4\\Un.png");
+    unIm.save(_fileName);
 }
+
+vector<KeyPoint> findBlobs(const Image& _im, float T)
+{
+    Pyramid pyr(_im);
+    vector<KeyPoint> res;
+    vector<KeyPoint> blobs = pyr.getDOG()->findExtemums();
+    for(int i = 0; i < blobs.size(); i++)
+    {
+        if(_im.HarrisForPoint(blobs[i]) > T)
+        {
+            res.emplace_back(blobs[i]);
+        }
+
+    }
+
+
+    return res;
+}
+
 
 int main()
 {
-    QString fileName1 = "C:\\4\\q1.png";
+    QString fileName1 = "C:\\6\\p1.png";
     shared_ptr<Image> myIm1 = Image::fromFile(fileName1);
     myIm1 = myIm1->GaussFilter(0.5, EdgeMode::COPY);
-    QString fileName2 = "C:\\4\\q2.png";
+    QString fileName2 = "C:\\6\\p2.png";
     shared_ptr<Image> myIm2 = Image::fromFile(fileName2);
     myIm2 = myIm2->GaussFilterSep(0.5, EdgeMode::COPY);
 
@@ -144,8 +142,8 @@ int main()
     vector<KeyPoint> points2 = myIm2->Harris(4, 100);//Moravec(0.02, 300);//
 
 
-    myIm1->addPoints(points1).save("C:\\4\\Pq1.tif");
-    myIm2->addPoints(points2).save("C:\\4\\Pq2.tif");
+    myIm1->addPoints(points1).save("C:\\6\\Pq1.tif");
+    myIm2->addPoints(points2).save("C:\\6\\Pq2.tif");
 
     DescriptorFactory factory1(*myIm1);
     DescriptorFactory factory2(*myIm2);
@@ -156,7 +154,7 @@ int main()
 
 
     vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
-    DrawMatches(*myIm1, *myIm2, matches, "C:\\4\\Un.png");
+    DrawMatches(*myIm1, *myIm2, matches, "C:\\6\\Un.png");
 
 
     cout<<"\ngood";
