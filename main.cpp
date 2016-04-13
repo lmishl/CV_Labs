@@ -110,21 +110,60 @@ void DrawMatches(const Image &_im1, const Image &_im2, vector<pair<KeyPoint, Key
     unIm.save(_fileName);
 }
 
-vector<KeyPoint> findBlobs(const Image& _im, float T)
+vector<Descriptor> findBlobs(const Image& _im, float T,  const QString &_fileName)
 {
-    unsigned int start_time =  clock(); // начальное время
+    vector<Descriptor> res;
+
+
     Pyramid pyr(_im);
-    cout<<"\nPyr "<< (int)clock() - start_time;
-    vector<KeyPoint> res;
     vector<KeyPoint> blobs = pyr.getDOG()->findExtemums();
-    cout<<"\nDOG "<< (int)clock() - start_time;
+
     for(int i = 0; i < blobs.size(); i++)
     {
 
-        if(pyr.getImage(blobs[i].sigma)->HarrisForPoint(blobs[i]) > T)
+        if(pyr.getImage(blobs[i].sigma)->HarrisForPoint(blobs[i]) < T)
         {
-            res.emplace_back(blobs[i]);
+            blobs.erase(blobs.begin() + i);
+            i--;
         }
+    }
+
+
+
+
+    if(blobs.size() == 0)
+        return res;
+
+    //вывод
+    _im.addPoints(blobs).save(_fileName);
+
+
+    //теперь найдём дескрипторы к оставшимся блобам
+
+    int curSigma = blobs[0].sigma;
+    shared_ptr<Image> img = pyr.getImage(curSigma);
+    shared_ptr<DescriptorFactory> factory = make_shared<DescriptorFactory>(*img);
+    vector<KeyPoint> cur;
+    for(int i = 0; i < blobs.size(); i++)
+    {
+        if(blobs[i].sigma != curSigma)
+        {
+            //переходим на следующую сигму, перед этим надо посчитать дескрипторы для накопленных точек в cur
+            vector<Descriptor> temp = factory->get(cur);
+            for(int q = 0; q < temp.size(); q++ )
+                res.emplace_back(temp[q]);
+            //res.insert(res.end(),temp.begin(),temp.end());      //Не работает !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+            //переходим на следующую сигму
+            cur.clear();
+            curSigma = blobs[i].sigma;
+            shared_ptr<Image> img = pyr.getImage(curSigma);
+            factory = make_shared<DescriptorFactory>(*img);
+        }
+        cur.push_back(blobs[i]);
+
 
     }
 
@@ -144,14 +183,14 @@ int main()
     //myIm2 = myIm2->GaussFilterSep(0.5, EdgeMode::COPY);
 
 
-    vector<KeyPoint> points1 = findBlobs(*myIm1, 0);
-    vector<KeyPoint> points2 = findBlobs(*myIm2, 0);
+    vector<Descriptor> descs1 = findBlobs(*myIm1, 0, "C:\\6\\blob1.tif");
+    vector<Descriptor> descs2 = findBlobs(*myIm2, 0, "C:\\6\\blob2.tif");
     //vector<KeyPoint> points1 = myIm1->Harris(3, 100);//Moravec(0.02, 300);//
     //vector<KeyPoint> points2 = myIm2->Harris(3, 100);//Moravec(0.02, 300);//
     //
     //
-    myIm1->addPoints(points1).save("C:\\6\\Pq1.tif");
-    myIm2->addPoints(points2).save("C:\\6\\Pq2.tif");
+    //myIm1->addPoints(points1).save("C:\\6\\Pq1.tif");
+    //myIm2->addPoints(points2).save("C:\\6\\Pq2.tif");
     //
     //DescriptorFactory factory1(*myIm1);
     //DescriptorFactory factory2(*myIm2);
@@ -161,8 +200,8 @@ int main()
     //vector<Descriptor> descs2 = factory2.get(points2);
     //
     //
-    //vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
-    //DrawMatches(*myIm1, *myIm2, matches, "C:\\6\\Un.png");
+    vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
+    DrawMatches(*myIm1, *myIm2, matches, "C:\\6\\Un.png");
 
     unsigned int search_time = (int)clock() - start_time; // искомое время
     cout<<"\ngood "<< search_time;
