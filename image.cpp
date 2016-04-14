@@ -346,8 +346,8 @@ vector<KeyPoint> Image::Harris(float _T, int _N) const
         {
             float a = 0, b = 0, c = 0;
 
-            for(int dy = - heightW/2; dy < heightW/2; dy++)
-                for(int dx = -widthW/2; dx < widthW/2; dx++)
+            for(int dy = - heightW/2; dy <= heightW/2; dy++)
+                for(int dx = -widthW/2; dx <= widthW/2; dx++)
                 {
                     float x = gradX->getPixel(i + dy, j + dx);
                     float y = gradY->getPixel(i + dy, j + dx);
@@ -402,8 +402,8 @@ float Image::HarrisForPoint(KeyPoint _p) const
 
     float a = 0, b = 0, c = 0;
 
-    for(int dy = - heightW/2; dy < heightW/2; dy++)
-        for(int dx = -widthW/2; dx < widthW/2; dx++)
+    for(int dy = - heightW/2; dy <= heightW/2; dy++)
+        for(int dx = -widthW/2; dx <= widthW/2; dx++)
         {
             float x = gradX(_p.x + dy, _p.y + dx);
             float y = gradY(_p.x + dy, _p.y + dx);

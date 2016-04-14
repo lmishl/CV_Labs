@@ -128,6 +128,28 @@ vector<Descriptor> findBlobs(const Image& _im, float T,  const QString &_fileNam
         }
     }
 
+    //рисуем сучие блобы
+    QImage qim = _im.addPoints(blobs);
+    QPainter painter;
+    painter.begin(&qim);
+    painter.setPen(Qt::red);
+    for(int i = 0; i < blobs.size(); i++)
+    {
+        int number = log2(blobs[i].sigma / 1.6);
+        int k = pow(2, number);
+
+        float r = blobs[i].sigma * sqrt(2) * k;
+        float x0 = blobs[i].x * k - r;
+        float y0 = blobs[i].y * k - r;
+
+        painter.drawEllipse(QPoint(y0, x0), (int)(r), (int)(r));
+    }
+
+    painter.end();
+
+
+    qim.save(_fileName);
+
 
 
 
@@ -135,7 +157,7 @@ vector<Descriptor> findBlobs(const Image& _im, float T,  const QString &_fileNam
         return res;
 
     //вывод
-    _im.addPoints(blobs).save(_fileName);
+    //_im.addPoints(blobs).save(_fileName);
 
 
     //теперь найдём дескрипторы к оставшимся блобам
