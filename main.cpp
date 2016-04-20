@@ -129,7 +129,7 @@ vector<Descriptor> findBlobs(const Image& _im, float T,  const QString &_fileNam
     }
 
     //рисуем сучие блобы
-    QImage qim = _im.addPoints(blobs);
+    QImage qim = _im.ot0do255()->addPoints(blobs);
     QPainter painter;
     painter.begin(&qim);
     painter.setPen(Qt::red);
@@ -138,9 +138,9 @@ vector<Descriptor> findBlobs(const Image& _im, float T,  const QString &_fileNam
         int number = log2(blobs[i].sigma / 1.6);
         int k = pow(2, number);
 
-        float r = blobs[i].sigma * sqrt(2) * k;
-        float x0 = blobs[i].x * k - r;
-        float y0 = blobs[i].y * k - r;
+        float r = blobs[i].sigma * sqrt(2) ;
+        float x0 = blobs[i].x * k;
+        float y0 = blobs[i].y * k;
 
         painter.drawEllipse(QPoint(y0, x0), (int)(r), (int)(r));
     }
@@ -205,8 +205,16 @@ int main()
     //myIm2 = myIm2->GaussFilterSep(0.5, EdgeMode::COPY);
 
 
-    vector<Descriptor> descs1 = findBlobs(*myIm1, 0, "C:\\6\\blob1.tif");
-    vector<Descriptor> descs2 = findBlobs(*myIm2, 0, "C:\\6\\blob2.tif");
+    vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 0, "C:\\6\\blob1.tif");
+   // return 0;
+
+    cout<<"\blob1  "<< (int)clock() - start_time;
+    vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 0, "C:\\6\\blob2.tif");
+
+
+    cout<<"\blob2  "<< (int)clock() - start_time;
+
+
     //vector<KeyPoint> points1 = myIm1->Harris(3, 100);//Moravec(0.02, 300);//
     //vector<KeyPoint> points2 = myIm2->Harris(3, 100);//Moravec(0.02, 300);//
     //

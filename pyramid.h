@@ -3,7 +3,7 @@
 #include "image.h"
 #include "maskfactory.h"
 static const double Sigma0 = 1.6;
-static const unsigned NumLevels = 3;
+static const unsigned NumLevels = 8;
 
 class Pyramid
 {

@@ -3,7 +3,7 @@
 Pyramid::Pyramid(const Image& _im)
 {
     int minS = min(_im.getHeight(), _im.getWidth());
-    numOctave = log2(minS) - 5;      //строим новую октаву пока изображение не станет меньше 64
+    numOctave = log2(minS) - 3;      //строим новую октаву пока изображение не станет меньше 64
 
     //досглаживаем до Sigma0
     float deltaSigma = sqrt(Sigma0 * Sigma0 - 0.25);
@@ -15,7 +15,7 @@ Pyramid::Pyramid(const Image& _im)
     for(int i = 0; i < numOctave; i++ )
     {
         PyramidLevel level(Sigma0, k, i);
-        level.add(curIm->ot0do1());
+        level.add(curIm);
         float curSigma = Sigma0;
         for(int j = 0; j < NumLevels + 1; j++)
         {
@@ -23,10 +23,10 @@ Pyramid::Pyramid(const Image& _im)
             float deltaSigma = sqrt(newSigma * newSigma - curSigma * curSigma);
 
             curIm = curIm->GaussFilterSep(deltaSigma,  EdgeMode::COPY);
-            level.add(curIm->ot0do1());
+            level.add(curIm);
             curSigma = newSigma;
         }
-        curIm = level.get(NumLevels)->DownScale();
+        curIm = level.get(NumLevels - 1)->DownScale();
         vec.emplace_back(level);
     }
 
@@ -50,6 +50,8 @@ shared_ptr<Pyramid> Pyramid::getDOG() const
         res->vec.emplace_back(dogLevel);
     }
 
+   // res->output("C:\\pyr");
+
     return res;
 }
 
@@ -60,7 +62,7 @@ void Pyramid::output(const QString &dirName) const
         for(int j = 0; j < vec[i].size(); j++)
         {
             QString fileName = dirName + "\\" + QString::number(i) + "-" + QString::number(j) + "-sig-" + QString::number(vec[i].globalSigma(j)) + ".jpg";
-            vec[i].get(j)->toFile(fileName);
+            vec[i].get(j)->normalize()->toFile(fileName);
         }
     }
 

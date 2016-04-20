@@ -63,6 +63,7 @@ public:
 
     shared_ptr<Image> normalize() const;
     shared_ptr<Image> ot0do1() const;
+    shared_ptr<Image> ot0do255() const;
 
     shared_ptr<Image> GaussFilterSep(float _sigma, EdgeMode _mode) const;
     shared_ptr<Image> GaussFilter(float _sigma, EdgeMode _mode) const;
