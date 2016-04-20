@@ -445,9 +445,9 @@ QImage Image::addPoints(vector<KeyPoint> _vec) const
     int size = _vec.size();
     for(int i = 0; i < size; i++)
     {
-        int number = log2(_vec[i].sigma / 1.6);
-        int x = _vec[i].x * pow(2, number);
-        int y = _vec[i].y * pow(2, number);
+
+        int x = _vec[i].globX();
+        int y = _vec[i].globY();
 
 
         res.setPixel(y, x + 1, qRgb(255,0,0));
