@@ -3,7 +3,7 @@
 Pyramid::Pyramid(const Image& _im)
 {
     int minS = min(_im.getHeight(), _im.getWidth());
-    numOctave = log2(minS) - 3;      //строим новую октаву пока изображение не станет меньше 64
+    numOctave = log2(minS) - 2;      //строим новую октаву пока изображение не станет меньше 64
 
     //досглаживаем до Sigma0
     float deltaSigma = sqrt(Sigma0 * Sigma0 - 0.25);
@@ -17,7 +17,7 @@ Pyramid::Pyramid(const Image& _im)
         PyramidLevel level(Sigma0, k, i);
         level.add(curIm);
         float curSigma = Sigma0;
-        for(int j = 0; j < NumLevels + 1; j++)
+        for(int j = 0; j < NumLevels + 3; j++)
         {
             float newSigma = curSigma * k;
             float deltaSigma = sqrt(newSigma * newSigma - curSigma * curSigma);
@@ -26,7 +26,7 @@ Pyramid::Pyramid(const Image& _im)
             level.add(curIm);
             curSigma = newSigma;
         }
-        curIm = level.get(NumLevels - 1)->DownScale();
+        curIm = level.get(NumLevels - 3)->DownScale();
         vec.emplace_back(level);
     }
 
