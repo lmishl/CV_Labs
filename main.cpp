@@ -162,7 +162,7 @@ vector<Descriptor> findBlobs(const Image& _im, float T,  const QString &_fileNam
 
     //теперь найдём дескрипторы к оставшимся блобам
 
-    int curSigma = blobs[0].sigma;
+    float curSigma = blobs[0].sigma;
     shared_ptr<Image> img = pyr.getImage(curSigma);
     shared_ptr<DescriptorFactory> factory = make_shared<DescriptorFactory>(*img);
     vector<KeyPoint> cur;
@@ -208,11 +208,11 @@ int main()
     vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 0, "C:\\6\\blob1.tif");
    // return 0;
 
-    cout<<"\blob1  "<< (int)clock() - start_time;
+    cout<<"blob1  "<< (int)clock() - start_time;
     vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 0, "C:\\6\\blob2.tif");
 
 
-    cout<<"\blob2  "<< (int)clock() - start_time;
+    cout<<"blob2  "<< (int)clock() - start_time;
 
 
     //vector<KeyPoint> points1 = myIm1->Harris(3, 100);//Moravec(0.02, 300);//

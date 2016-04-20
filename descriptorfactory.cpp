@@ -194,7 +194,8 @@ array<float, DescriptorDims> DescriptorFactory::getFinalBins(const KeyPoint _poi
 
 vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
 {
-    int netSize = GistNum * GistSize;
+    const int netSize = GistNum * GistSize;
+
     float anglesBinSize = 360.0 / AnglesBinNum; //размер корзины для направления в градусах
     float binSize = 360.0 / BinNum; //размер итоговой корзины в градусах
 
@@ -227,17 +228,21 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
 
 
         //обработка второй по величине корзины
+        //она должна быть больше 0.8 первой и не быть соседней
         int bin2 = mainBins.second;
-        if(anglesArr[bin2] > 0.8 * anglesArr[bin1])
+        if(anglesArr[bin2] > 0.8 * anglesArr[bin1] && abs(myProc(bin2,BinNum) - myProc(bin1,BinNum)) > 1)
         {
             float angle0 = bin2 * anglesBinSize - anglesBinSize / 2;
             float angle1 = bin2 * anglesBinSize + anglesBinSize / 2;
             float angle2 = bin2 * anglesBinSize + anglesBinSize * 3 / 2;
 
             float mainAngle = interpol(angle0,angle1,angle2, anglesArr[myProc(bin2 - 1,BinNum)], anglesArr[bin2],anglesArr[myProc(bin2 + 1,BinNum)] );
+            //костыль
+            if(mainAngle > 360 || mainAngle < 0)
+                continue;
 
             //Итоговое распределение по корзинам
-            array<float, DescriptorDims> arr = getFinalBins(_points[k], netSize, mainAngle, y, x, binSize);
+            array<float, DescriptorDims> arr = getFinalBins(_points[k], netSize, mainAngle, y, x, binSize); //здесь поебень
             res.emplace_back(arr, _points[k]);
         }
 
