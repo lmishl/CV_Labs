@@ -2,7 +2,7 @@
 #include "image.h"
 
 
-class PyramidLevel
+class PyramidLevel//октава
 {
 public:
     PyramidLevel(float _sigma, float _k, int _number);

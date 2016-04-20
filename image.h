@@ -23,18 +23,31 @@ struct KeyPoint
 {
     int x,y;
     float sigma, val;
-    KeyPoint(int _x, int _y, float _val, float _sigma)
+    int numberOctave;
+    float angle;
+    KeyPoint(int _x, int _y, float _val, float _sigma, int _number = 0)
     {
         x = _x;
         y = _y;
         sigma = _sigma;
         val = _val;
+        numberOctave = _number;
     }
 
     float dist(KeyPoint p)
     {
         return sqrt((x - p.x) * (x - p.x) + (y - p.y) * (y - p.y));
 
+    }
+
+    int globX()
+    {
+        return x * 1 << numberOctave;
+    }
+
+    int globY()
+    {
+        return y * 1 << numberOctave;
     }
 };
 

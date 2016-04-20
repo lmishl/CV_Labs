@@ -76,7 +76,7 @@ vector<KeyPoint> PyramidLevel::findExtemums() const
     int w = vec[0]->getWidth();
     int h = vec[0]->getHeight();
     vector<KeyPoint> res;
-    static int zopa = 0;
+    //static int zopa = 0;
 
     for(int q = 1; q < vec.size() - 1; q++)
     {
@@ -89,7 +89,7 @@ vector<KeyPoint> PyramidLevel::findExtemums() const
                     {
                         // пересчитывать координаты
 
-                        res.emplace_back(i, j, 0, globalSigma(q));
+                        res.emplace_back(i, j, 0, globalSigma(q), number);
                         //QImage zzzzz = vec[q]->normalize()->toQImage();
                         //zzzzz.setPixel(QPoint(j, i),qRgb(255,0,0));
                         //zzzzz.save(("C://pyr//qqq"s + to_string( zopa++) + "jgjgj.png").c_str());

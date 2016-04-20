@@ -102,7 +102,7 @@ void DrawMatches(const Image &_im1, const Image &_im2, vector<pair<KeyPoint, Key
         //кароче рисуем
         QPen qqq(QColor(rand() % 255, rand() % 255, rand() % 255));
         painter.setPen(qqq);
-        painter.drawLine(QPoint(left.y, left.x), QPoint(right.y + _im1.getWidth(), right.x));
+        painter.drawLine(QPoint(left.globY(), left.globX()), QPoint(right.globY() + _im1.getWidth(), right.globX()));
     }
     painter.end();
 
@@ -135,12 +135,12 @@ vector<Descriptor> findBlobs(const Image& _im, float T,  const QString &_fileNam
     painter.setPen(Qt::red);
     for(int i = 0; i < blobs.size(); i++)
     {
-        int number = log2(blobs[i].sigma / 1.6);
-        int k = pow(2, number);
+        //int number = log2(blobs[i].sigma / 1.6);
+        //int k = pow(2, number);
 
         float r = blobs[i].sigma * sqrt(2) ;
-        float x0 = blobs[i].x * k;
-        float y0 = blobs[i].y * k;
+        float x0 = blobs[i].globX();
+        float y0 = blobs[i].globY();
 
         painter.drawEllipse(QPoint(y0, x0), (int)(r), (int)(r));
     }
