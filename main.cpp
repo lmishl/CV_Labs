@@ -93,7 +93,8 @@ void DrawMatches(const Image &_im1, const Image &_im2, vector<pair<KeyPoint, Key
     QImage unIm = _im1.Union(_im2);//save("C:\\4\\Un.png");
     QPainter painter;
     painter.begin(&unIm);
-  //  painter.setPen(Qt::darkCyan);
+
+    int addW = _im1.getWidth();
 
     for(int i = 0; i < _matches.size(); i++)
     {
@@ -102,9 +103,34 @@ void DrawMatches(const Image &_im1, const Image &_im2, vector<pair<KeyPoint, Key
         //кароче рисуем
         QPen qqq(QColor(rand() % 255, rand() % 255, rand() % 255));
         painter.setPen(qqq);
-        painter.drawLine(QPoint(left.globY(), left.globX()), QPoint(right.globY() + _im1.getWidth(), right.globX()));
-        int razmer1 = GistSize * GistNum;
-        painter.drawRect(left.globY()- razmer1 / 2, left.globX()- razmer1 / 2, razmer1, razmer1);
+        painter.drawLine(QPoint(left.globY(), left.globX()), QPoint(right.globY() + addW, right.globX()));
+
+        //рисуем окрестность и направление
+        int side1 = GistSize * GistNum * pow(2,left.numberOctave);
+        int halfSide1 = side1/2;
+        pair<float, float> p0 = rotate(left.globX(), left.globY(), left.globX() - halfSide1, left.globY() - halfSide1, left.angle);
+        pair<float, float> p1 = rotate(left.globX(), left.globY(), left.globX() - halfSide1, left.globY() + halfSide1, left.angle);
+        pair<float, float> p2 = rotate(left.globX(), left.globY(), left.globX() + halfSide1, left.globY() + halfSide1, left.angle);
+        pair<float, float> p3 = rotate(left.globX(), left.globY(), left.globX() + halfSide1, left.globY() - halfSide1, left.angle);
+        painter.drawLine(p0.second, p0.first, p1.second, p1.first);
+        painter.drawLine(p1.second, p1.first, p2.second, p2.first);
+        painter.drawLine(p2.second, p2.first, p3.second, p3.first);
+        painter.drawLine(p3.second, p3.first, p0.second, p0.first);
+        pair<float, float> pA = rotate(left.globX(), left.globY(), left.globX() - halfSide1, left.globY(), left.angle);
+        painter.drawLine(pA.second, pA.first, left.globY(), left.globX());
+       // painter.drawRect(left.globY()- razmer1 / 2, left.globX()- razmer1 / 2, razmer1, razmer1);
+        int side2 = GistSize * GistNum * pow(2, right.numberOctave);
+        int halfSide2 = side2/2;
+        pair<float, float> p10 = rotate(right.globX(), right.globY(), right.globX() - halfSide2, right.globY() - halfSide2, right.angle);
+        pair<float, float> p11 = rotate(right.globX(), right.globY(), right.globX() - halfSide2, right.globY() + halfSide2, right.angle);
+        pair<float, float> p12 = rotate(right.globX(), right.globY(), right.globX() + halfSide2, right.globY() + halfSide2, right.angle);
+        pair<float, float> p13 = rotate(right.globX(), right.globY(), right.globX() + halfSide2, right.globY() - halfSide2, right.angle);
+        painter.drawLine(p10.second + addW, p10.first, p11.second + addW, p11.first);
+        painter.drawLine(p11.second + addW, p11.first, p12.second + addW, p12.first);
+        painter.drawLine(p12.second + addW, p12.first, p13.second + addW, p13.first);
+        painter.drawLine(p13.second + addW, p13.first, p10.second + addW, p10.first);
+        pair<float, float> p1A = rotate(right.globX(), right.globY(), right.globX() - halfSide2, right.globY(), right.angle);
+        painter.drawLine(p1A.second+ addW, p1A.first, right.globY()+ addW, right.globX());
     }
     painter.end();
 
@@ -203,10 +229,10 @@ int main()
 
 
 
-    vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 1, "C:\\6\\blob1.tif");
+    vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 0.3, "C:\\6\\blob1.tif");
 
     cout<<"blob1  "<< (int)clock() - start_time<<endl;
-    vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 1, "C:\\6\\blob2.tif");
+    vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 0.3, "C:\\6\\blob2.tif");
 
 
     cout<<"blob2  "<< (int)clock() - start_time<<endl;
