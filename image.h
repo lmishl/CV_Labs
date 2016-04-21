@@ -40,12 +40,12 @@ struct KeyPoint
 
     }
 
-    int globX()
+    int globX() const
     {
         return x * 1 << numberOctave;
     }
 
-    int globY()
+    int globY() const
     {
         return y * 1 << numberOctave;
     }

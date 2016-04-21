@@ -203,9 +203,10 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
 
     for(int k = 0; k < _points.size(); k++)
     {
+        KeyPoint curPoint = _points[k];
         //левая верхняя рассматриваемая точка
-        int x = _points[k].x - (GistNum / 2) * GistSize;
-        int y = _points[k].y - (GistNum / 2) * GistSize;
+        int x = curPoint.x - (GistNum / 2) * GistSize;
+        int y = curPoint.y - (GistNum / 2) * GistSize;
 
 
         //найдём пиковое направление
@@ -221,10 +222,10 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
         float angle2 = bin1 * anglesBinSize + anglesBinSize * 3 / 2;
 
         float mainAngle = interpol(angle0,angle1,angle2, anglesArr[myProc(bin1 - 1,BinNum)], anglesArr[bin1],anglesArr[myProc(bin1 + 1,BinNum)] );
-
+        curPoint.angle = mainAngle;
         //Итоговое распределение по корзинам
-        array<float, DescriptorDims> arr = getFinalBins(_points[k], netSize, mainAngle, y, x, binSize);
-        res.emplace_back(arr, _points[k]);
+        array<float, DescriptorDims> arr = getFinalBins(curPoint, netSize, mainAngle, y, x, binSize);
+        res.emplace_back(arr, curPoint);
 
 
         //обработка второй по величине корзины
@@ -237,13 +238,16 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
             float angle2 = bin2 * anglesBinSize + anglesBinSize * 3 / 2;
 
             float mainAngle = interpol(angle0,angle1,angle2, anglesArr[myProc(bin2 - 1,BinNum)], anglesArr[bin2],anglesArr[myProc(bin2 + 1,BinNum)] );
-            //костыль
-            if(mainAngle > 360 || mainAngle < 0)
-                continue;
 
+            //костыль
+            assert(mainAngle < 360 && mainAngle > 0);
+
+
+
+            curPoint.angle = mainAngle;
             //Итоговое распределение по корзинам
-            array<float, DescriptorDims> arr = getFinalBins(_points[k], netSize, mainAngle, y, x, binSize); //здесь поебень
-            res.emplace_back(arr, _points[k]);
+            array<float, DescriptorDims> arr = getFinalBins(curPoint, netSize, mainAngle, y, x, binSize); //здесь поебень
+            res.emplace_back(arr, curPoint);
         }
 
 

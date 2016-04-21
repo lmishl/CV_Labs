@@ -48,7 +48,7 @@ pair<int, int> findClosestPair(Descriptor _p, vector<Descriptor> _vec)
         swap(res1, res2);
     }
 
-    for(int i = 2; i < _vec.size(); i++)
+    for(uint i = 2; i < _vec.size(); i++)
     {
         float dist = _p.dist(_vec[i]);
         if(dist < minDist1)     //нашли меньше обоих
@@ -110,6 +110,29 @@ void DrawMatches(const Image &_im1, const Image &_im2, vector<pair<KeyPoint, Key
     unIm.save(_fileName);
 }
 
+void DrawBlobs(const Image& _im, const vector<KeyPoint>& _blobs, const QString &_fileName)
+{
+    //рисуем сучие блобы
+    QImage qim = _im.ot0do255()->addPoints(_blobs);
+    QPainter painter;
+    painter.begin(&qim);
+    painter.setPen(Qt::red);
+    for(int i = 0; i < _blobs.size(); i++)
+    {
+        float r = _blobs[i].sigma * sqrt(2) ;
+        float x0 = _blobs[i].globX();
+        float y0 = _blobs[i].globY();
+
+        painter.drawEllipse(QPoint(y0, x0), (int)(r), (int)(r));
+    }
+
+    painter.end();
+
+    qim.save(_fileName);
+}
+
+
+
 vector<Descriptor> findBlobs(const Image& _im, float T,  const QString &_fileName)
 {
     vector<Descriptor> res;
@@ -128,37 +151,10 @@ vector<Descriptor> findBlobs(const Image& _im, float T,  const QString &_fileNam
         }
     }
 
-    //рисуем сучие блобы
-    QImage qim = _im.ot0do255()->addPoints(blobs);
-    QPainter painter;
-    painter.begin(&qim);
-    painter.setPen(Qt::red);
-    for(int i = 0; i < blobs.size(); i++)
-    {
-        //int number = log2(blobs[i].sigma / 1.6);
-        //int k = pow(2, number);
-
-        float r = blobs[i].sigma * sqrt(2) ;
-        float x0 = blobs[i].globX();
-        float y0 = blobs[i].globY();
-
-        painter.drawEllipse(QPoint(y0, x0), (int)(r), (int)(r));
-    }
-
-    painter.end();
-
-
-    qim.save(_fileName);
-
-
-
+    DrawBlobs(_im, blobs, _fileName);       //рисование
 
     if(blobs.size() == 0)
         return res;
-
-    //вывод
-    //_im.addPoints(blobs).save(_fileName);
-
 
     //теперь найдём дескрипторы к оставшимся блобам
 
@@ -199,41 +195,26 @@ int main()
     unsigned int start_time =  clock(); // начальное время
     QString fileName1 = "C:\\6\\p1.png";
     shared_ptr<Image> myIm1 = Image::fromFile(fileName1);
-    //myIm1 = myIm1->GaussFilter(0.5, EdgeMode::COPY);
+
     QString fileName2 = "C:\\6\\p2.png";
     shared_ptr<Image> myIm2 = Image::fromFile(fileName2);
-    //myIm2 = myIm2->GaussFilterSep(0.5, EdgeMode::COPY);
 
 
-    vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 0, "C:\\6\\blob1.tif");
-   // return 0;
 
-    cout<<"blob1  "<< (int)clock() - start_time;
-    vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 0, "C:\\6\\blob2.tif");
+    vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 1, "C:\\6\\blob1.tif");
 
-
-    cout<<"blob2  "<< (int)clock() - start_time;
+    cout<<"blob1  "<< (int)clock() - start_time<<endl;
+    vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 1, "C:\\6\\blob2.tif");
 
 
-    //vector<KeyPoint> points1 = myIm1->Harris(3, 100);//Moravec(0.02, 300);//
-    //vector<KeyPoint> points2 = myIm2->Harris(3, 100);//Moravec(0.02, 300);//
-    //
-    //
-    //myIm1->addPoints(points1).save("C:\\6\\Pq1.tif");
-    //myIm2->addPoints(points2).save("C:\\6\\Pq2.tif");
-    //
-    //DescriptorFactory factory1(*myIm1);
-    //DescriptorFactory factory2(*myIm2);
-    //
-    ////получаем все дескрипторы
-    //vector<Descriptor> descs1 = factory1.get(points1);
-    //vector<Descriptor> descs2 = factory2.get(points2);
-    //
-    //
+    cout<<"blob2  "<< (int)clock() - start_time<<endl;
+
+
+
     vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
     DrawMatches(*myIm1, *myIm2, matches, "C:\\6\\Un.png");
 
     unsigned int search_time = (int)clock() - start_time; // искомое время
-    cout<<"\ngood "<< search_time;
+    cout<<"\ngood "<< search_time<<endl;
     return 0;
 }

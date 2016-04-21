@@ -414,7 +414,6 @@ float Image::HarrisForPoint(KeyPoint _p) const
     int heightW = 5, widthW = 5;
     float k = 0.06;
 
-    //shared_ptr<Image> working = ot0do1();             //Надо добавить!!!!!!!!!!!!!!!!!!!
 
     float a = 0, b = 0, c = 0;
 
