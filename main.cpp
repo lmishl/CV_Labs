@@ -93,7 +93,7 @@ void DrawMatches(const Image &_im1, const Image &_im2, vector<pair<KeyPoint, Key
     QImage unIm = _im1.Union(_im2);//save("C:\\4\\Un.png");
     QPainter painter;
     painter.begin(&unIm);
-    painter.setPen(Qt::darkCyan);
+  //  painter.setPen(Qt::darkCyan);
 
     for(int i = 0; i < _matches.size(); i++)
     {
@@ -103,6 +103,8 @@ void DrawMatches(const Image &_im1, const Image &_im2, vector<pair<KeyPoint, Key
         QPen qqq(QColor(rand() % 255, rand() % 255, rand() % 255));
         painter.setPen(qqq);
         painter.drawLine(QPoint(left.globY(), left.globX()), QPoint(right.globY() + _im1.getWidth(), right.globX()));
+        int razmer1 = GistSize * GistNum;
+        painter.drawRect(left.globY()- razmer1 / 2, left.globX()- razmer1 / 2, razmer1, razmer1);
     }
     painter.end();
 

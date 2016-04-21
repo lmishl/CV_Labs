@@ -158,9 +158,8 @@ array<float, DescriptorDims> DescriptorFactory::getFinalBins(const KeyPoint _poi
             int curGistY = newY / GistSize;
             int curGist = curGistX * GistNum + curGistY;
 
-            //assert
-            if(curGist >31 || curGist <0)
-                curGist = 1;
+            assert(curGist <= 31 && curGist >= 0);
+
 
             float weight = magnitudes->getPixel(i, j, EdgeMode::COPY);
             float angle = angles->getPixel(i, j, EdgeMode::COPY) - mainAngle;
@@ -243,15 +242,11 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
             assert(mainAngle < 360 && mainAngle > 0);
 
 
-
             curPoint.angle = mainAngle;
             //Итоговое распределение по корзинам
             array<float, DescriptorDims> arr = getFinalBins(curPoint, netSize, mainAngle, y, x, binSize); //здесь поебень
             res.emplace_back(arr, curPoint);
         }
-
-
-
     }
 
     return res;
