@@ -16,7 +16,8 @@ SOURCES += main.cpp \
     pyramid.cpp \
     pyramidlevel.cpp \
     descriptor.cpp \
-    descriptorfactory.cpp
+    descriptorfactory.cpp \
+    utils.cpp
 
 HEADERS += \
     image.h \
@@ -25,4 +26,5 @@ HEADERS += \
     pyramid.h \
     pyramidlevel.h \
     descriptor.h \
-    descriptorfactory.h
+    descriptorfactory.h \
+    utils.h

@@ -69,7 +69,13 @@ bool Image::toFile(const QString &fileName) const
     return image.save(fileName, "JPEG");
 }
 
-float Image::getPixel(int i, int j, EdgeMode mode) const
+
+float Image::getPixel(KeyPoint _p, EdgeMode _mode) const
+{
+    return getPixel(_p.x, _p.y, _mode);
+}
+
+float Image::getPixel(int i, int j, EdgeMode _mode) const
 {
     if(i<height && j<width && i>=0 && j>=0)
     {
@@ -77,7 +83,7 @@ float Image::getPixel(int i, int j, EdgeMode mode) const
     }
     else
     {
-        switch(mode)
+        switch(_mode)
         {
         case EdgeMode::ZEROS: return 0;
         case EdgeMode::COPY:
@@ -175,6 +181,22 @@ shared_ptr<Image> Image::ot0do1() const
     return result;
 }
 
+shared_ptr<Image> Image::ot0do255() const
+{
+    shared_ptr<Image> result = make_shared<Image>(height, width);
+
+    for(int i=0; i< height; i++)
+    {
+        for(int j=0; j<width; j++)
+        {
+            float val = getPixel(i,j) * 255;
+            result->setPixel(i,j,val);
+        }
+    }
+    return result;
+}
+
+
 int Image::getHeight() const
 {
     return height;
@@ -240,7 +262,7 @@ vector<KeyPoint> Image::FindLocalMax( float _T, int _N) const
                     }
                 }
             if (isLocalMax)
-                res.emplace_back(i, j, curV);
+                res.emplace_back(i, j, curV, 0);
         }
 
 
@@ -331,17 +353,17 @@ vector<KeyPoint> Image::Harris(float _T, int _N) const
 
     MaskFactory factory;
     shared_ptr<Image> gradX = working->convolution(factory.SobelX(), EdgeMode::COPY);
-    gradX->toFile("C:\\1\\gradX.tif");
+    // gradX->toFile("C:\\1\\gradX.tif");
     shared_ptr<Image> gradY = working->convolution(factory.SobelY(), EdgeMode::COPY);
-    gradY->toFile("C:\\1\\gradY.tif");
+    //  gradY->toFile("C:\\1\\gradY.tif");
     Image A(height, width), B(height, width), C(height, width);
     for(int i = 0; i < height; i++)
         for(int j = 0; j < width; j++)
         {
             float a = 0, b = 0, c = 0;
 
-            for(int dy = - heightW/2; dy < heightW/2; dy++)
-                for(int dx = -widthW/2; dx < widthW/2; dx++)
+            for(int dy = - heightW/2; dy <= heightW/2; dy++)
+                for(int dx = -widthW/2; dx <= widthW/2; dx++)
                 {
                     float x = gradX->getPixel(i + dy, j + dx);
                     float y = gradY->getPixel(i + dy, j + dx);
@@ -357,9 +379,9 @@ vector<KeyPoint> Image::Harris(float _T, int _N) const
     //теперь знаем а б и с в каждой точке
 
 
-    A.toFile("C:\\1\\A.tif");
-    B.toFile("C:\\1\\B.tif");
-    C.toFile("C:\\1\\C.tif");
+    // A.toFile("C:\\1\\A.tif");
+    // B.toFile("C:\\1\\B.tif");
+    // C.toFile("C:\\1\\C.tif");
 
 
 
@@ -379,10 +401,41 @@ vector<KeyPoint> Image::Harris(float _T, int _N) const
             F.setPixel(i, j, curF);
         }
     vector<KeyPoint> qq = F.FindLocalMax(_T, _N);
-    F.normalize();
-    F.toFile("C:\\1\\F.tif");
+    // F.normalize();
+    //  F.toFile("C:\\1\\F.tif");
 
     return qq;
+}
+
+
+
+float Image::HarrisForPoint(KeyPoint _p) const
+{
+    int heightW = 5, widthW = 5;
+    float k = 0.06;
+
+
+    float a = 0, b = 0, c = 0;
+
+    for(int dy = - heightW/2; dy <= heightW/2; dy++)
+        for(int dx = -widthW/2; dx <= widthW/2; dx++)
+        {
+            float x = gradX(_p.x + dy, _p.y + dx);
+            float y = gradY(_p.x + dy, _p.y + dx);
+            a += x * x;
+            b += x * y;
+            c += y * y;
+        }
+
+
+
+    //теперь знаем а б и с в нашей точке
+
+    float det = a * c - b * b;
+    float trace = a + c;
+    float curF = det - k * trace * trace;
+
+    return curF;
 }
 
 QImage Image::addPoints(vector<KeyPoint> _vec) const
@@ -391,15 +444,22 @@ QImage Image::addPoints(vector<KeyPoint> _vec) const
     int size = _vec.size();
     for(int i = 0; i < size; i++)
     {
-        res.setPixel(_vec[i].y, _vec[i].x + 1, qRgb(255,0,0));
-        res.setPixel(_vec[i].y, _vec[i].x - 1, qRgb(255,0,0));
-        res.setPixel(_vec[i].y + 1, _vec[i].x, qRgb(255,0,0));
-        res.setPixel(_vec[i].y - 1, _vec[i].x, qRgb(255,0,0));
+
+        int x = _vec[i].globX();
+        int y = _vec[i].globY();
+
+
+        res.setPixel(y, x + 1, qRgb(255,0,0));
+        res.setPixel(y, x - 1, qRgb(255,0,0));
+        res.setPixel(y + 1, x, qRgb(255,0,0));
+        res.setPixel(y - 1, x, qRgb(255,0,0));
 
     }
 
     return res;
 }
+
+
 
 
 QImage Image::Union(const Image &rightIm) const
@@ -415,4 +475,54 @@ QImage Image::Union(const Image &rightIm) const
     painter.drawImage(QPoint(left.width(),0), right);
     painter.end();
     return destImage;
+}
+
+shared_ptr<Image> Image::minus(const Image &rightIm) const
+{
+    shared_ptr<Image> result = make_shared<Image>(height, width);
+
+    for(int i = 0; i < height; i++)
+
+        for(int j = 0; j < width; j++)
+        {
+            float val = getPixel(i, j) - rightIm.getPixel(i, j);
+            result->setPixel(i, j, val);
+        }
+    return result;
+}
+
+float Image::gradX(int i, int j, EdgeMode _mode) const
+{
+    static float mask[] = {-1,0,1,-2,0,2,-1,0,1};
+
+
+    float sum = 0;
+    for(int i1 = 0; i1 < 3; i1++)
+    {
+        for(int j1 = 0; j1 < 3; j1++)
+        {
+            float iPix = getPixel(i - (i1 - 1), j - (j1 - 1), _mode);
+            float mPix = mask[i1 * 3 + j1];
+            sum += iPix * mPix;
+        }
+    }
+    return sum;
+}
+
+float Image::gradY(int i, int j, EdgeMode _mode) const
+{
+    static float mask[] = {-1,-2,-1,0,0,0,1,2,1};
+
+
+    float sum = 0;
+    for(int i1 = 0; i1 < 3; i1++)
+    {
+        for(int j1 = 0; j1 < 3; j1++)
+        {
+            float iPix = getPixel(i - (i1 - 1), j - (j1 - 1), _mode);
+            float mPix = mask[i1 * 3 + j1];
+            sum += iPix * mPix;
+        }
+    }
+    return sum;
 }

@@ -2,19 +2,23 @@
 #include "pyramidlevel.h"
 #include "image.h"
 #include "maskfactory.h"
+static const double Sigma0 = 1.6;
+static const unsigned NumLevels = 8;
 
 class Pyramid
 {
 public:
-    Pyramid(const Image& _im, float _sigma0, int _numLevels, EdgeMode _mode);
+    Pyramid(const Image& _im);
+    Pyramid(int _numOctave, float _k);
     void output(const QString &dirName) const;
     float L(int _x, int _y, float _sigma) const;
+    shared_ptr<Image> getImage(float _sigma) const;
+    shared_ptr<Pyramid> getDOG() const;
+    vector<KeyPoint> findExtemums() const;
 
-private:
-   vector<PyramidLevel> vec;
-   //Image original;      нужна ли?
-   float sigma0;
-   int numLevels;
-   int numOctave;
-   float k;     //для очередной сигмы
+
+private:   
+    vector<PyramidLevel> vec;
+    int numOctave;
+    float k;     //для очередной сигмы
 };

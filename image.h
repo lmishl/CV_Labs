@@ -22,18 +22,32 @@ enum class EdgeMode
 struct KeyPoint
 {
     int x,y;
-    float val;
-    KeyPoint(int _x, int _y, float _val)
+    float sigma, val;
+    int numberOctave;
+    float angle;
+    KeyPoint(int _x, int _y, float _val, float _sigma, int _number = 0)
     {
         x = _x;
         y = _y;
+        sigma = _sigma;
         val = _val;
+        numberOctave = _number;
     }
 
     float dist(KeyPoint p)
     {
         return sqrt((x - p.x) * (x - p.x) + (y - p.y) * (y - p.y));
 
+    }
+
+    int globX() const
+    {
+        return x * 1 << numberOctave;
+    }
+
+    int globY() const
+    {
+        return y * 1 << numberOctave;
     }
 };
 
@@ -51,7 +65,10 @@ public:
     QImage toQImage() const;
     bool toFile(const QString &fileName)const;
 
-    float getPixel(int i, int j, EdgeMode mode=EdgeMode::ZEROS) const;
+    float getPixel(int i, int j, EdgeMode _mode=EdgeMode::COPY) const;
+    float getPixel(KeyPoint _p, EdgeMode _mode=EdgeMode::COPY) const;
+    float gradX(int i, int j, EdgeMode _mode=EdgeMode::COPY) const;
+    float gradY(int i, int j, EdgeMode _mode=EdgeMode::COPY) const;
     float setPixel(int i, int j, float value);
 
     int getHeight() const;
@@ -59,18 +76,20 @@ public:
 
     shared_ptr<Image> normalize() const;
     shared_ptr<Image> ot0do1() const;
+    shared_ptr<Image> ot0do255() const;
 
     shared_ptr<Image> GaussFilterSep(float _sigma, EdgeMode _mode) const;
     shared_ptr<Image> GaussFilter(float _sigma, EdgeMode _mode) const;
 
     vector<KeyPoint> Moravec(float _T, int _N) const;
     vector<KeyPoint> Harris(float _T, int _N) const;
-    QImage addPoints(vector<KeyPoint> _vec) const;
+    float HarrisForPoint(KeyPoint _p) const;
+    QImage addPoints(vector<KeyPoint> _vec) const;   
 
     QImage Union(const Image &rightIm) const;
 
 
-
+    shared_ptr<Image> minus(const Image &rightIm) const;
 
 private:
     const unique_ptr<float[]> image;
