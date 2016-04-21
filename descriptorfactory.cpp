@@ -124,35 +124,75 @@ array<float, DescriptorDims> DescriptorFactory::getFinalBins(const KeyPoint _poi
             //Узнаём в какую гистограмму попадает точка
             int curGistX = newX / GistSize;
             int curGistY = newY / GistSize;
-            int curGist = curGistX * GistNum + curGistY;
-
-            assert(curGist <= 31 && curGist >= 0);
 
 
-            float weight = magnitudes->getPixel(i, j, EdgeMode::COPY);
-            float angle = angles->getPixel(i, j, EdgeMode::COPY) - mainAngle;
-            if(angle < 0)
-                angle += 360;
 
-            //начинаем раскидывать по корзинам
-            int bin1 = angle / binSize;   // главная корзина
-            float b1Center = bin1 * binSize + binSize / 2;
+            //ЛАБА 7
+            //Реализовать распределение значений градиентов по смежным гистограммам, добавить весовые коэффициенты(globW) исходя из расстояния до соответствующих центров.
 
-            //вычисляем соседнюю
-            int bin2 = bin1 + 1;
-            if(angle < b1Center)
-                bin2 = bin1 - 1;
-            //обрабатываем граничные случаи
-            bin2 = (bin2 + BinNum) % BinNum;
+            //надо считать глобальный вес,
+            //http://www.cyberforum.ru/mathematics/thread790820.html ваще огонь формула
 
-            float b1Dist = abs(angle - b1Center);
-            float b2Dist = binSize - b1Dist;
+            array <float,GistSize*GistSize> dist;
+            float sum = 0; //сумма 1/расст
+            for(int u = curGistX - 1; u < curGistX + 1; u++)
+                for(int v = curGistY - 1; v < curGistY + 1; v++)
+                {
+                    if(u < 0 || u >= GistSize || v < 0 || v>= GistSize)
+                        continue;
+                    int curGist = u * GistNum + v;
+                     assert(curGist <= 31 && curGist >= 0);
 
-            //раскидываем обратнопропорционально расстоянию
-            float w1 = weight * (b2Dist / binSize);
-            float w2 = weight - w1;
-            arr[curGist * GistSize + bin1] += w1;
-            arr[curGist * GistSize + bin2] += w2;
+                    int centerX = u * GistSize + GistSize / 2;
+                    int centerY = v * GistSize + GistSize / 2;
+
+                    dist[curGist] = hypot(newX - centerX, newY - centerY);
+                    sum+=dist[curGist];
+
+
+                }
+
+            float k = 1 / sum;
+            for(int u = curGistX - 1; u < curGistX + 1; u++)
+                for(int v = curGistY - 1; v < curGistY + 1; v++)
+                {
+                    if(u < 0 || u >= GistSize || v < 0 || v>= GistSize)
+                        continue;
+                    int curGist = u * GistNum + v;
+                     assert(curGist <= 31 && curGist >= 0);
+
+                    float globW = k / dist[curGist];
+
+
+                    float weight = magnitudes->getPixel(i, j, EdgeMode::COPY);
+                    float angle = angles->getPixel(i, j, EdgeMode::COPY) - mainAngle;
+                    if(angle < 0)
+                        angle += 360;
+
+                    //начинаем раскидывать по корзинам
+                    int bin1 = angle / binSize;   // главная корзина
+                    float b1Center = bin1 * binSize + binSize / 2;
+
+                    //вычисляем соседнюю
+                    int bin2 = bin1 + 1;
+                    if(angle < b1Center)
+                        bin2 = bin1 - 1;
+                    //обрабатываем граничные случаи
+                    bin2 = (bin2 + BinNum) % BinNum;
+
+                    float b1Dist = abs(angle - b1Center);
+                    float b2Dist = binSize - b1Dist;
+
+                    //раскидываем обратнопропорционально расстоянию
+                    float w1 = weight * (b2Dist / binSize);
+                    float w2 = weight - w1;
+                    arr[curGist * GistSize + bin1] += w1 * globW;
+                    arr[curGist * GistSize + bin2] += w2 * globW;
+
+                }
+
+
+
 
         }
 
@@ -177,6 +217,8 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
 
 
         //найдём пиковое направление
+
+        //найдём гистограмму углов
         array<float, AnglesBinNum> anglesArr = findAngleBins(x, netSize, y, anglesBinSize);
 
 
@@ -190,7 +232,9 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
 
         float mainAngle = interpol(angle0,angle1,angle2, anglesArr[myProc(bin1 - 1,BinNum)], anglesArr[bin1],anglesArr[myProc(bin1 + 1,BinNum)] );
         curPoint.angle = mainAngle;
-        //Итоговое распределение по корзинам
+
+
+        //Вычисляем наконец дескриптор- Итоговое распределение по корзинам
         array<float, DescriptorDims> arr = getFinalBins(curPoint, netSize, mainAngle, y, x, binSize);
         res.emplace_back(arr, curPoint);
 
