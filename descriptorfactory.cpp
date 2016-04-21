@@ -135,8 +135,8 @@ array<float, DescriptorDims> DescriptorFactory::getFinalBins(const KeyPoint _poi
 
             array <float,GistSize*GistSize> dist;
             float sum = 0; //сумма 1/расст
-            for(int u = curGistX - 1; u < curGistX + 1; u++)
-                for(int v = curGistY - 1; v < curGistY + 1; v++)
+            for(int u = curGistX - 1; u <= curGistX + 1; u++)
+                for(int v = curGistY - 1; v <= curGistY + 1; v++)
                 {
                     if(u < 0 || u >= GistSize || v < 0 || v>= GistSize)
                         continue;
@@ -153,8 +153,8 @@ array<float, DescriptorDims> DescriptorFactory::getFinalBins(const KeyPoint _poi
                 }
 
             float k = 1 / sum;
-            for(int u = curGistX - 1; u < curGistX + 1; u++)
-                for(int v = curGistY - 1; v < curGistY + 1; v++)
+            for(int u = curGistX - 1; u <= curGistX + 1; u++)
+                for(int v = curGistY - 1; v <= curGistY + 1; v++)
                 {
                     if(u < 0 || u >= GistSize || v < 0 || v>= GistSize)
                         continue;
