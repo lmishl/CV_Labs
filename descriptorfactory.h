@@ -9,6 +9,7 @@ class DescriptorFactory
 public:
     DescriptorFactory(const Image& image);
     vector<Descriptor> get(const vector<KeyPoint> &points);
+    
 private:
     unique_ptr<Image> magnitudes;
     unique_ptr<Image> angles;

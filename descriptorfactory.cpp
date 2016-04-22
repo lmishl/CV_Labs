@@ -99,6 +99,48 @@ array<float, AnglesBinNum> DescriptorFactory::findAngleBins(int x, int netSize, 
     return anglesArr;
 }
 
+vector<int> selectGists(float newY, float newX, int mainGistX, int mainGistY)
+{
+    vector<int> activeGists;
+    int mainGist = mainGistX * GistNum + mainGistY;
+    activeGists.emplace_back(mainGist);
+    int mainCenterX = mainGistX * GistSize + GistSize / 2;
+    int mainCenterY = mainGistY * GistSize + GistSize / 2;
+
+
+
+    if(newX >= mainCenterX)  //точка ниже середины
+    {
+        //низ
+        if(mainGistX + 1 < GistNum)  //это была не нижняя гистограмма
+        {
+            activeGists.emplace_back(mainGist + GistNum);   //добавляем нижнюю гистограмму
+            if(newY >= mainCenterY && mainGistY + 1 < GistNum )//точка правее середины и гистограмма не самая правая
+                activeGists.emplace_back(mainGist + GistNum + 1);   //добавляем правую нижнюю гистограмму
+            if(newY < mainCenterY && mainGistY > 0)//точка левее середины и гистограмма не самая левая
+                activeGists.emplace_back(mainGist + GistNum - 1);   //добавляем левую нижнюю гистограмму
+        }
+    }
+    else //точка выше середины
+    {
+        if(mainGistX > 0)  //это была не верхняя гистограмма
+        {
+            activeGists.emplace_back(mainGist - GistNum);   //добавляем верхнюю гистограмму
+            if(newY >= mainCenterY && mainGistY + 1 < GistNum )//точка правее середины и гистограмма не самая правая
+                activeGists.emplace_back(mainGist - GistNum + 1);   //добавляем правую верхнюю гистограмму
+            if(newY < mainCenterY && mainGistY > 0)//точка левее середины и гистограмма не самая левая
+                activeGists.emplace_back(mainGist - GistNum - 1);   //добавляем левую верхнюю гистограмму
+        }
+    }
+    //бока
+    if(newY >= mainCenterY && mainGistY + 1 < GistNum )//точка правее середины и гистограмма не самая правая
+        activeGists.emplace_back(mainGist + 1);   //добавляем правую  гистограмму
+    if(newY < mainCenterY && mainGistY > 0)//точка левее середины и гистограмма не самая левая
+        activeGists.emplace_back(mainGist - 1);
+
+    return activeGists;
+}
+
 array<float, DescriptorDims> DescriptorFactory::getFinalBins(const KeyPoint _point, int netSize, float mainAngle, int y, int x, float binSize)
 {
     array<float, DescriptorDims> arr;
@@ -132,105 +174,59 @@ array<float, DescriptorDims> DescriptorFactory::getFinalBins(const KeyPoint _poi
 
             //надо считать глобальный вес,
             //http://www.cyberforum.ru/mathematics/thread790820.html ваще огонь формула
-            vector<pair<int, float>> active;        //вектор активная вершина + рас-е до неё
-            vector<int> activeGists;
-            int mainGist = mainGistX * GistNum + mainGistY;
-            activeGists.emplace_back(mainGist);
-            int mainCenterX = mainGistX * GistSize + GistSize / 2;
-            int mainCenterY = mainGistY * GistSize + GistSize / 2;
 
-
-
-            if(newX >= mainCenterX)  //точка ниже середины
-            {
-                //низ
-                if(mainGistX + 1 < GistNum)  //это была не нижняя гистограмма
-                {
-                    activeGists.emplace_back(mainGist + GistNum);   //добавляем нижнюю гистограмму
-                    if(newY >= mainCenterY && mainGistY + 1 < GistNum )//точка правее середины и гистограмма не самая правая
-                        activeGists.emplace_back(mainGist + GistNum + 1);   //добавляем правую нижнюю гистограмму
-                    if(newY < mainCenterY && mainGistY > 0)//точка левее середины и гистограмма не самая левая
-                        activeGists.emplace_back(mainGist + GistNum - 1);   //добавляем левую нижнюю гистограмму
-                }
-            }
-            else //точка выше середины
-            {
-                if(mainGistX > 0)  //это была не верхняя гистограмма
-                {
-                    activeGists.emplace_back(mainGist - GistNum);   //добавляем верхнюю гистограмму
-                    if(newY >= mainCenterY && mainGistY + 1 < GistNum )//точка правее середины и гистограмма не самая правая
-                        activeGists.emplace_back(mainGist - GistNum + 1);   //добавляем правую верхнюю гистограмму
-                    if(newY < mainCenterY && mainGistY > 0)//точка левее середины и гистограмма не самая левая
-                        activeGists.emplace_back(mainGist - GistNum - 1);   //добавляем левую верхнюю гистограмму
-                }
-            }
-            //бока
-            if(newY >= mainCenterY && mainGistY + 1 < GistNum )//точка правее середины и гистограмма не самая правая
-                activeGists.emplace_back(mainGist + 1);   //добавляем правую  гистограмму
-            if(newY < mainCenterY && mainGistY > 0)//точка левее середины и гистограмма не самая левая
-                activeGists.emplace_back(mainGist - 1);   //добавляем левую верхнюю гистограмму
-
-
-
-
-            // array <float,GistSize*GistSize> dist;
+            //выбираем между какими гистограммами будем раскидывать
+            vector<int> activeGists = selectGists(newY, newX, mainGistX, mainGistY);
 
             float sum = 0; //сумма 1/расст
-            for(int u = mainGistX - 1; u <= mainGistX + 1; u++)
-                for(int v = mainGistY - 1; v <= mainGistY + 1; v++)
-                {
-                    if(u < 0 || u >= GistSize || v < 0 || v>= GistSize)
-                        continue;
-                    int curGist = u * GistNum + v;
-                    assert(curGist <= 31 && curGist >= 0);
+            vector<float> dist;
+            for(uint q = 0; q < activeGists.size(); q++)
+            {
+                int centerX =(activeGists[q] / GistNum) * GistSize + GistSize / 2;
+                int centerY =(activeGists[q] % GistNum) * GistSize + GistSize / 2;
 
-                    int centerX = u * GistSize + GistSize / 2;
-                    int centerY = v * GistSize + GistSize / 2;
+                float d = hypot(newX - centerX, newY - centerY);
+                dist.emplace_back(d);
+                sum += 1 / d;
+            }
 
-                    dist[curGist] = hypot(newX - centerX, newY - centerY);
-                    sum+=dist[curGist];
-
-
-                }
 
             float k = 1 / sum;
-            for(int u = mainGistX - 1; u <= mainGistX + 1; u++)
-                for(int v = mainGistY - 1; v <= mainGistY + 1; v++)
-                {
-                    if(u < 0 || u >= GistSize || v < 0 || v>= GistSize)
-                        continue;
-                    int curGist = u * GistNum + v;
-                    assert(curGist <= 31 && curGist >= 0);
+            for(uint q = 0; q < activeGists.size(); q++)
+            {
 
-                    float globW = k / dist[curGist];
+                int curGist = activeGists[q];
+                assert(curGist <= 31 && curGist >= 0);
+
+                float globW = k / dist[q];
 
 
-                    float weight = magnitudes->getPixel(i, j, EdgeMode::COPY);
-                    float angle = angles->getPixel(i, j, EdgeMode::COPY) - mainAngle;
-                    if(angle < 0)
-                        angle += 360;
+                float weight = magnitudes->getPixel(i, j, EdgeMode::COPY);
+                float angle = angles->getPixel(i, j, EdgeMode::COPY) - mainAngle;
+                if(angle < 0)
+                    angle += 360;
 
-                    //начинаем раскидывать по корзинам
-                    int bin1 = angle / binSize;   // главная корзина
-                    float b1Center = bin1 * binSize + binSize / 2;
+                //начинаем раскидывать по корзинам
+                int bin1 = angle / binSize;   // главная корзина
+                float b1Center = bin1 * binSize + binSize / 2;
 
-                    //вычисляем соседнюю
-                    int bin2 = bin1 + 1;
-                    if(angle < b1Center)
-                        bin2 = bin1 - 1;
-                    //обрабатываем граничные случаи
-                    bin2 = (bin2 + BinNum) % BinNum;
+                //вычисляем соседнюю
+                int bin2 = bin1 + 1;
+                if(angle < b1Center)
+                    bin2 = bin1 - 1;
+                //обрабатываем граничные случаи
+                bin2 = (bin2 + BinNum) % BinNum;
 
-                    float b1Dist = abs(angle - b1Center);
-                    float b2Dist = binSize - b1Dist;
+                float b1Dist = abs(angle - b1Center);
+                float b2Dist = binSize - b1Dist;
 
-                    //раскидываем обратнопропорционально расстоянию
-                    float w1 = weight * (b2Dist / binSize);
-                    float w2 = weight - w1;
-                    arr[curGist * GistSize + bin1] += w1 * globW;
-                    arr[curGist * GistSize + bin2] += w2 * globW;
+                //раскидываем обратнопропорционально расстоянию
+                float w1 = weight * (b2Dist / binSize);
+                float w2 = weight - w1;
+                arr[curGist * GistSize + bin1] += w1 * globW;
+                arr[curGist * GistSize + bin2] += w2 * globW;
 
-                }
+            }
 
 
 

@@ -221,18 +221,18 @@ vector<Descriptor> findBlobs(const Image& _im, float T,  const QString &_fileNam
 int main()
 {
     unsigned int start_time =  clock(); // начальное время
-    QString fileName1 = "C:\\6\\p1.png";
+    QString fileName1 = "C:\\7\\w1.png";
     shared_ptr<Image> myIm1 = Image::fromFile(fileName1);
 
-    QString fileName2 = "C:\\6\\p2.png";
+    QString fileName2 = "C:\\7\\w2.png";
     shared_ptr<Image> myIm2 = Image::fromFile(fileName2);
 
 
 
-    vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 0.3, "C:\\6\\blob1.tif");
+    vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 1, "C:\\7\\blob1.tif");
 
     cout<<"blob1  "<< (int)clock() - start_time<<endl;
-    vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 0.3, "C:\\6\\blob2.tif");
+    vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 1, "C:\\7\\blob2.tif");
 
 
     cout<<"blob2  "<< (int)clock() - start_time<<endl;
@@ -240,7 +240,7 @@ int main()
 
 
     vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
-    DrawMatches(*myIm1, *myIm2, matches, "C:\\6\\Un.png");
+    DrawMatches(*myIm1, *myIm2, matches, "C:\\7\\Un.png");
 
     unsigned int search_time = (int)clock() - start_time; // искомое время
     cout<<"\ngood "<< search_time<<endl;
