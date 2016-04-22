@@ -229,10 +229,10 @@ int main()
 
 
 
-    vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 1, "C:\\7\\blob1.tif");
+    vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 2, "C:\\7\\blob1.tif");
 
     cout<<"blob1  "<< (int)clock() - start_time<<endl;
-    vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 1, "C:\\7\\blob2.tif");
+    vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 2, "C:\\7\\blob2.tif");
 
 
     cout<<"blob2  "<< (int)clock() - start_time<<endl;

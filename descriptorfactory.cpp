@@ -143,6 +143,12 @@ vector<int> selectGists(float newY, float newX, int mainGistX, int mainGistY)
 
 array<float, DescriptorDims> DescriptorFactory::getFinalBins(const KeyPoint _point, int netSize, float mainAngle, int y, int x, float binSize)
 {
+    //НУЖНО БОЛЬШЕ КОЭФФИЦИЕНТОВ!!!!!!
+    //Типа взвешивание для гистограмм
+    static float gistK[16] = {1.0/28, 3.0/56, 3.0/56, 1.0/28, 3.0/56, 3.0/28, 3.0/28, 3.0/56, 3.0/56, 3.0/28, 3.0/28, 3.0/56, 1.0/28, 3.0/56, 3.0/56, 1.0/28};
+
+
+
     array<float, DescriptorDims> arr;
     arr.fill(0);
 
@@ -223,8 +229,8 @@ array<float, DescriptorDims> DescriptorFactory::getFinalBins(const KeyPoint _poi
                 //раскидываем обратнопропорционально расстоянию
                 float w1 = weight * (b2Dist / binSize);
                 float w2 = weight - w1;
-                arr[curGist * GistSize + bin1] += w1 * globW;
-                arr[curGist * GistSize + bin2] += w2 * globW;
+                arr[curGist * GistSize + bin1] += w1 * globW * gistK[curGist];
+                arr[curGist * GistSize + bin2] += w2 * globW * gistK[curGist];
 
             }
 
