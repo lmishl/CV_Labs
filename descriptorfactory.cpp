@@ -242,7 +242,7 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
         //обработка второй по величине корзины
         //она должна быть больше 0.8 первой и не быть соседней
         int bin2 = mainBins.second;
-        if(anglesArr[bin2] > 0.8 * anglesArr[bin1] && abs(myProc(bin2,BinNum) - myProc(bin1,BinNum)) > 1)
+        if(anglesArr[bin2] > 0.8 * anglesArr[bin1] && abs(myProc(bin2,BinNum) - myProc(bin1,BinNum)) > 1 && abs(myProc(bin2,BinNum) - myProc(bin1,BinNum)) < BinNum - 1)
         {
             float angle0 = bin2 * anglesBinSize - anglesBinSize / 2;
             float angle1 = bin2 * anglesBinSize + anglesBinSize / 2;
