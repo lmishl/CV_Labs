@@ -122,8 +122,8 @@ array<float, DescriptorDims> DescriptorFactory::getFinalBins(const KeyPoint _poi
             newY -= y;
 
             //Узнаём в какую гистограмму попадает точка
-            int curGistX = newX / GistSize;
-            int curGistY = newY / GistSize;
+            int mainGistX = newX / GistSize;
+            int mainGistY = newY / GistSize;
 
 
 
@@ -132,16 +132,57 @@ array<float, DescriptorDims> DescriptorFactory::getFinalBins(const KeyPoint _poi
 
             //надо считать глобальный вес,
             //http://www.cyberforum.ru/mathematics/thread790820.html ваще огонь формула
+            vector<pair<int, float>> active;        //вектор активная вершина + рас-е до неё
+            vector<int> activeGists;
+            int mainGist = mainGistX * GistNum + mainGistY;
+            activeGists.emplace_back(mainGist);
+            int mainCenterX = mainGistX * GistSize + GistSize / 2;
+            int mainCenterY = mainGistY * GistSize + GistSize / 2;
 
-            array <float,GistSize*GistSize> dist;
+
+
+            if(newX >= mainCenterX)  //точка ниже середины
+            {
+                //низ
+                if(mainGistX + 1 < GistNum)  //это была не нижняя гистограмма
+                {
+                    activeGists.emplace_back(mainGist + GistNum);   //добавляем нижнюю гистограмму
+                    if(newY >= mainCenterY && mainGistY + 1 < GistNum )//точка правее середины и гистограмма не самая правая
+                        activeGists.emplace_back(mainGist + GistNum + 1);   //добавляем правую нижнюю гистограмму
+                    if(newY < mainCenterY && mainGistY > 0)//точка левее середины и гистограмма не самая левая
+                        activeGists.emplace_back(mainGist + GistNum - 1);   //добавляем левую нижнюю гистограмму
+                }
+            }
+            else //точка выше середины
+            {
+                if(mainGistX > 0)  //это была не верхняя гистограмма
+                {
+                    activeGists.emplace_back(mainGist - GistNum);   //добавляем верхнюю гистограмму
+                    if(newY >= mainCenterY && mainGistY + 1 < GistNum )//точка правее середины и гистограмма не самая правая
+                        activeGists.emplace_back(mainGist - GistNum + 1);   //добавляем правую верхнюю гистограмму
+                    if(newY < mainCenterY && mainGistY > 0)//точка левее середины и гистограмма не самая левая
+                        activeGists.emplace_back(mainGist - GistNum - 1);   //добавляем левую верхнюю гистограмму
+                }
+            }
+            //бока
+            if(newY >= mainCenterY && mainGistY + 1 < GistNum )//точка правее середины и гистограмма не самая правая
+                activeGists.emplace_back(mainGist + 1);   //добавляем правую  гистограмму
+            if(newY < mainCenterY && mainGistY > 0)//точка левее середины и гистограмма не самая левая
+                activeGists.emplace_back(mainGist - 1);   //добавляем левую верхнюю гистограмму
+
+
+
+
+            // array <float,GistSize*GistSize> dist;
+
             float sum = 0; //сумма 1/расст
-            for(int u = curGistX - 1; u <= curGistX + 1; u++)
-                for(int v = curGistY - 1; v <= curGistY + 1; v++)
+            for(int u = mainGistX - 1; u <= mainGistX + 1; u++)
+                for(int v = mainGistY - 1; v <= mainGistY + 1; v++)
                 {
                     if(u < 0 || u >= GistSize || v < 0 || v>= GistSize)
                         continue;
                     int curGist = u * GistNum + v;
-                     assert(curGist <= 31 && curGist >= 0);
+                    assert(curGist <= 31 && curGist >= 0);
 
                     int centerX = u * GistSize + GistSize / 2;
                     int centerY = v * GistSize + GistSize / 2;
@@ -153,13 +194,13 @@ array<float, DescriptorDims> DescriptorFactory::getFinalBins(const KeyPoint _poi
                 }
 
             float k = 1 / sum;
-            for(int u = curGistX - 1; u <= curGistX + 1; u++)
-                for(int v = curGistY - 1; v <= curGistY + 1; v++)
+            for(int u = mainGistX - 1; u <= mainGistX + 1; u++)
+                for(int v = mainGistY - 1; v <= mainGistY + 1; v++)
                 {
                     if(u < 0 || u >= GistSize || v < 0 || v>= GistSize)
                         continue;
                     int curGist = u * GistNum + v;
-                     assert(curGist <= 31 && curGist >= 0);
+                    assert(curGist <= 31 && curGist >= 0);
 
                     float globW = k / dist[curGist];
 
@@ -222,7 +263,7 @@ vector<Descriptor> DescriptorFactory::get(const vector<KeyPoint> &_points)
         array<float, AnglesBinNum> anglesArr = findAngleBins(x, netSize, y, anglesBinSize);
 
 
-         //Обработка главной корзины
+        //Обработка главной корзины
         auto mainBins = findMaxPair(anglesArr);
         int bin1 = mainBins.first;
         //теперь интерполируем чтобы найти главное направление
