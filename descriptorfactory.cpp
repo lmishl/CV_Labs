@@ -99,8 +99,14 @@ array<float, AnglesBinNum> DescriptorFactory::findAngleBins(int x, int netSize, 
     return anglesArr;
 }
 
-vector<int> selectGists(float newY, float newX, int mainGistX, int mainGistY)
+vector<int> selectGists(float newY, float newX)
 {
+    //Узнаём в какую гистограмму попадает точка
+    int mainGistX = newX / GistSize;
+    int mainGistY = newY / GistSize;
+
+
+
     vector<int> activeGists;
     int mainGist = mainGistX * GistNum + mainGistY;
     activeGists.emplace_back(mainGist);
@@ -145,7 +151,7 @@ array<float, DescriptorDims> DescriptorFactory::getFinalBins(const KeyPoint _poi
 {
     //НУЖНО БОЛЬШЕ КОЭФФИЦИЕНТОВ!!!!!!
     //Типа взвешивание для гистограмм
-    static float gistK[16] = {1.0/28, 3.0/56, 3.0/56, 1.0/28, 3.0/56, 3.0/28, 3.0/28, 3.0/56, 3.0/56, 3.0/28, 3.0/28, 3.0/56, 1.0/28, 3.0/56, 3.0/56, 1.0/28};
+   // static float gistK[16] = {1.0/28, 3.0/56, 3.0/56, 1.0/28, 3.0/56, 3.0/28, 3.0/28, 3.0/56, 3.0/56, 3.0/28, 3.0/28, 3.0/56, 1.0/28, 3.0/56, 3.0/56, 1.0/28};
 
 
 
@@ -166,77 +172,114 @@ array<float, DescriptorDims> DescriptorFactory::getFinalBins(const KeyPoint _poi
             if(newX < x || newX > x + netSize || newY < y || newY > y + netSize)
                 continue;
 
+            float weight = magnitudes->getPixel(i, j, EdgeMode::COPY);
+            float angle = angles->getPixel(i, j, EdgeMode::COPY) - mainAngle;
+            if(angle < 0)
+                angle += 360;
+
+
             newX -= x;
             newY -= y;
 
-            //Узнаём в какую гистограмму попадает точка
-            int mainGistX = newX / GistSize;
-            int mainGistY = newY / GistSize;
+            int HistX = floor(newX / GistSize + 0.5);
+            int HistY = floor(newY / GistSize + 0.5);
+            int HistA = floor(angle / binSize + 0.5);       //корзина
 
-
-
-            //ЛАБА 7
-            //Реализовать распределение значений градиентов по смежным гистограммам, добавить весовые коэффициенты(globW) исходя из расстояния до соответствующих центров.
-
-            //надо считать глобальный вес,
-            //http://www.cyberforum.ru/mathematics/thread790820.html ваще огонь формула
-
-            //выбираем между какими гистограммами будем раскидывать
-            vector<int> activeGists = selectGists(newY, newX, mainGistX, mainGistY);
-
-            float sum = 0; //сумма 1/расст
-            vector<float> dist;
-            for(uint q = 0; q < activeGists.size(); q++)
+            for(int xx = HistX - 1; xx <= HistX; xx++ )
             {
-                int centerX =(activeGists[q] / GistNum) * GistSize + GistSize / 2;
-                int centerY =(activeGists[q] % GistNum) * GistSize + GistSize / 2;
+                if(xx >= GistNum || xx < 0)
+                    continue;
+                int centerX = GistSize * xx + GistSize / 2;
+                float Lx = fabs(newX - centerX);
+                float wX = 1 - Lx / GistSize;
 
-                float d = hypot(newX - centerX, newY - centerY);
-                dist.emplace_back(d);
-                sum += 1 / d;
+                for(int yy = HistY - 1; yy <= HistY; yy++ )
+                {
+                    if(yy >= GistNum || yy < 0)
+                        continue;
+                    int centerY = GistSize * yy + GistSize / 2;
+                    float LY = fabs(newY - centerY);
+                    float wY = 1 - LY / GistSize;
+
+                    for(int aa = HistA - 1; aa <= HistA; aa++)
+                    {
+                        int bin = myProc(aa, BinNum);
+                        float centerA = binSize * aa + binSize / 2;
+                        float LA = fabs(angle - centerA);
+                        float wA = 1 - LA / binSize;
+                        assert(wA <= 1 && wA >= 0);
+                        int index = xx * GistSize * BinNum + yy * BinNum + bin;
+                        assert(index >= 0 && index < DescriptorDims);
+//                        if(!(index >= 0 && index < DescriptorDims))
+//                            wA++;
+
+                        arr[index] += weight * wX * wY * wA;
+
+                    }
+
+
+                }
             }
 
 
-            float k = 1 / sum;
-            for(uint q = 0; q < activeGists.size(); q++)
-            {
+//            //ЛАБА 7
+//            //Реализовать распределение значений градиентов по смежным гистограммам, добавить весовые коэффициенты(globW) исходя из расстояния до соответствующих центров.
 
-                int curGist = activeGists[q];
-                assert(curGist <= 31 && curGist >= 0);
+//            //надо считать глобальный вес,
+//            //http://www.cyberforum.ru/mathematics/thread790820.html ваще огонь формула
 
-                float globW = k / dist[q];
+//            //выбираем между какими гистограммами будем раскидывать
+//            vector<int> activeGists = selectGists(newY, newX);
 
+//            float sum = 0; //сумма 1/расст
+//            vector<float> dist;
+//            for(uint q = 0; q < activeGists.size(); q++)
+//            {
+//                int centerX =(activeGists[q] / GistNum) * GistSize + GistSize / 2;
+//                int centerY =(activeGists[q] % GistNum) * GistSize + GistSize / 2;
 
-                float weight = magnitudes->getPixel(i, j, EdgeMode::COPY);
-                float angle = angles->getPixel(i, j, EdgeMode::COPY) - mainAngle;
-                if(angle < 0)
-                    angle += 360;
-
-                //начинаем раскидывать по корзинам
-                int bin1 = angle / binSize;   // главная корзина
-                float b1Center = bin1 * binSize + binSize / 2;
-
-                //вычисляем соседнюю
-                int bin2 = bin1 + 1;
-                if(angle < b1Center)
-                    bin2 = bin1 - 1;
-                //обрабатываем граничные случаи
-                bin2 = (bin2 + BinNum) % BinNum;
-
-                float b1Dist = abs(angle - b1Center);
-                float b2Dist = binSize - b1Dist;
-
-                //раскидываем обратнопропорционально расстоянию
-                float w1 = weight * (b2Dist / binSize);
-                float w2 = weight - w1;
-                arr[curGist * GistSize + bin1] += w1 * globW * gistK[curGist];
-                arr[curGist * GistSize + bin2] += w2 * globW * gistK[curGist];
-
-            }
+//                float d = hypot(newX - centerX, newY - centerY);
+//                dist.emplace_back(d);
+//                sum += 1 / d;
+//            }
 
 
+//            float k = 1 / sum;
+//            for(uint q = 0; q < activeGists.size(); q++)
+//            {
+
+//                int curGist = activeGists[q];
+//                assert(curGist <= 31 && curGist >= 0);
+
+//                float globW = k / dist[q];
 
 
+//                float weight = magnitudes->getPixel(i, j, EdgeMode::COPY);
+//                float angle = angles->getPixel(i, j, EdgeMode::COPY) - mainAngle;
+//                if(angle < 0)
+//                    angle += 360;
+
+//                //начинаем раскидывать по корзинам
+//                int bin1 = angle / binSize;   // главная корзина
+//                float b1Center = bin1 * binSize + binSize / 2;
+
+//                //вычисляем соседнюю
+//                int bin2 = bin1 + 1;
+//                if(angle < b1Center)
+//                    bin2 = bin1 - 1;
+//                //обрабатываем граничные случаи
+//                bin2 = (bin2 + BinNum) % BinNum;
+
+//                float b1Dist = abs(angle - b1Center);
+//                float b2Dist = binSize - b1Dist;
+
+//                //раскидываем обратнопропорционально расстоянию
+//                float w1 = weight * (b2Dist / binSize);
+//                float w2 = weight - w1;
+//                arr[curGist * GistSize + bin1] += w1 * globW * gistK[curGist];
+//                arr[curGist * GistSize + bin2] += w2 * globW * gistK[curGist];
+
+//            }
         }
 
     return arr;
