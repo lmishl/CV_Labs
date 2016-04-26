@@ -17,7 +17,8 @@ SOURCES += main.cpp \
     pyramidlevel.cpp \
     descriptor.cpp \
     descriptorfactory.cpp \
-    utils.cpp
+    utils.cpp \
+    transformation.cpp
 
 HEADERS += \
     image.h \
@@ -27,7 +28,8 @@ HEADERS += \
     pyramidlevel.h \
     descriptor.h \
     descriptorfactory.h \
-    utils.h
+    utils.h \
+    transformation.h
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../../../GnuWin32/lib/ -lgsl
