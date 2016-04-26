@@ -34,13 +34,6 @@ Transformation::Transformation(vector<pair<KeyPoint, KeyPoint>> vec)
     //These functions compute the matrix-matrix product and sum C = \alpha op(A) op(B) + \beta C
     //where op(A) = A, A^T, A^H for TransA = CblasNoTrans, CblasTrans, CblasConjTrans and similarly for the parameter TransB.
     gsl_blas_dgemm(CblasTrans, CblasNoTrans, 1, A, A, 0, ATA);
-    cout <<"ATA do svd";
-    for(int i = 0; i < 9; i++)
-    {
-        cout <<endl;
-        for(int j = 0; j < 9; j++)
-            cout <<gsl_matrix_get(ATA,i,j)<<" ";
-    }
 
     //gsl_linalg_SV_decomp (gsl_matrix * A, gsl_matrix * V, gsl_vector * S, gsl_vector * work)
     //matrix A into the singular value decomposition A = U S V^T
@@ -48,7 +41,18 @@ Transformation::Transformation(vector<pair<KeyPoint, KeyPoint>> vec)
     gsl_matrix *V = gsl_matrix_alloc(9, 9);
     gsl_vector *S = gsl_vector_alloc(9);
     gsl_vector *work = gsl_vector_alloc(9);
-//    gsl_linalg_SV_decomp(ATA, V, S, work);
+    gsl_linalg_SV_decomp(ATA, V, S, work);
+
+    // теперь последний столбец V - это искомый вектор h
+    //всё разделим на h8, чтобы h8 =1
+    double h8 = gsl_matrix_get(V, 8, 8);
+    for(int i = 0; i < 9; i++)
+    {
+        h[i] = gsl_matrix_get(V, i, 8) / h8;
+    }
+
+
+
 //    cout <<endl<<"ATA"<<endl;
 //    for(int i = 0; i < 9; i++)
 //    {
@@ -71,29 +75,6 @@ Transformation::Transformation(vector<pair<KeyPoint, KeyPoint>> vec)
 //        cout <<gsl_vector_get(S,j)<<" ";
 
 
-
-     gsl_linalg_SV_decomp_jacobi(ATA, V, S);
-
-     cout <<endl<<"ATA"<<endl;
-     for(int i = 0; i < 9; i++)
-     {
-         cout <<endl;
-         for(int j = 0; j < 9; j++)
-             cout <<gsl_matrix_get(ATA,i,j)<<" ";
-     }
-
-     cout <<endl<<"V"<<endl;
-
-     for(int i = 0; i < 9; i++)
-     {
-         cout <<endl;
-         for(int j = 0; j < 9; j++)
-             cout <<gsl_matrix_get(V,i,j)<<" ";
-     }
-
-     cout<<endl <<"S"<<endl;
-     for(int j = 0; j < 9; j++)
-         cout <<gsl_vector_get(S,j)<<" ";
 
 
 }

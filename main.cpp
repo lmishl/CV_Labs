@@ -15,7 +15,54 @@
 #include "transformation.h"
 using namespace std;
 
+int* select4(int size)
+{
+    int selected[4];
+    selected[0] = rand() % size;
 
+    do
+    {
+        selected[1] = rand() % size;
+    }while(selected[1] == selected[0]);
+
+    do
+    {
+        selected[2] = rand() % size;
+    }while(selected[2] == selected[0] || selected[2] == selected[1] );
+
+    do
+    {
+        selected[3] = rand() % size;
+    }while(selected[3] == selected[0] || selected[3] == selected[1] || selected[3] == selected[2]);
+
+    return selected;
+}
+
+Transformation Ransac(vector<pair<KeyPoint, KeyPoint>> matches)
+{
+    if(matches.size() < 4 || iterCount == 0)
+        return NULL;
+
+    srand(time(0));
+    int size = matches.size();
+
+
+
+
+    //выбираем 4 разные точки
+    vector<pair<KeyPoint, KeyPoint>> cur;
+    int selected[4] = select4(size);
+    for(int i = 0; i < 4; i++)
+        cur.emplace_back(matches[selected[i]]);
+
+    //строим модель трансформации
+    Transformation t(cur);
+
+    //считаем inliers
+
+
+
+}
 
 
 int main()
@@ -42,7 +89,7 @@ int main()
     vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
     DrawMatches(*myIm1, *myIm2, matches, "C:\\7\\Un.png");
 
-    Transformation t(matches);
+    Transformation t = Ransac(matches);
 
     unsigned int search_time = (int)clock() - start_time; // искомое время
     cout<<"\ngood "<< search_time<<endl;

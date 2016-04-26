@@ -10,5 +10,7 @@ class Transformation
 {
 public:
     Transformation(vector<pair<KeyPoint, KeyPoint>> vec);
+private:
+    array<float, 9> h;
 };
 
