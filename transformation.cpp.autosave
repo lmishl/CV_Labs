@@ -48,7 +48,11 @@ Transformation::Transformation(vector<pair<KeyPoint, KeyPoint>> vec)
     gsl_matrix *V = gsl_matrix_alloc(9, 9);
     gsl_vector *S = gsl_vector_alloc(9);
     gsl_vector *work = gsl_vector_alloc(9);
-//    gsl_linalg_SV_decomp(ATA, V, S, work);
+    gsl_linalg_SV_decomp(ATA, V, S, work);
+    
+    // теперь последний столбец V - это искомый вектор h
+    
+    
 //    cout <<endl<<"ATA"<<endl;
 //    for(int i = 0; i < 9; i++)
 //    {
@@ -69,31 +73,8 @@ Transformation::Transformation(vector<pair<KeyPoint, KeyPoint>> vec)
 //    cout<<endl <<"S"<<endl;
 //    for(int j = 0; j < 9; j++)
 //        cout <<gsl_vector_get(S,j)<<" ";
-
-
-
-     gsl_linalg_SV_decomp_jacobi(ATA, V, S);
-
-     cout <<endl<<"ATA"<<endl;
-     for(int i = 0; i < 9; i++)
-     {
-         cout <<endl;
-         for(int j = 0; j < 9; j++)
-             cout <<gsl_matrix_get(ATA,i,j)<<" ";
-     }
-
-     cout <<endl<<"V"<<endl;
-
-     for(int i = 0; i < 9; i++)
-     {
-         cout <<endl;
-         for(int j = 0; j < 9; j++)
-             cout <<gsl_matrix_get(V,i,j)<<" ";
-     }
-
-     cout<<endl <<"S"<<endl;
-     for(int j = 0; j < 9; j++)
-         cout <<gsl_vector_get(S,j)<<" ";
+    
+    
 
 
 }
