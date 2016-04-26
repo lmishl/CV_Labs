@@ -12,6 +12,7 @@
 #include <maskfactory.h>
 #include "pyramid.h"
 #include <descriptorfactory.h>
+#include "transformation.h"
 using namespace std;
 
 
@@ -41,7 +42,7 @@ int main()
     vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
     DrawMatches(*myIm1, *myIm2, matches, "C:\\7\\Un.png");
 
-
+    Transformation t(matches);
 
     unsigned int search_time = (int)clock() - start_time; // искомое время
     cout<<"\ngood "<< search_time<<endl;
