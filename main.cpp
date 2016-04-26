@@ -12,6 +12,8 @@
 #include <maskfactory.h>
 #include "pyramid.h"
 #include <descriptorfactory.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_blas.h>
 using namespace std;
 
 shared_ptr<Image> Sobel(const Image& _im, EdgeMode _mode)
@@ -237,7 +239,7 @@ int main()
 
     cout<<"blob2  "<< (int)clock() - start_time<<endl;
 
-
+   gsl_matrix *A = gsl_matrix_alloc(8,8);
 
     vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
     DrawMatches(*myIm1, *myIm2, matches, "C:\\7\\Un.png");

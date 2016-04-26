@@ -28,3 +28,11 @@ HEADERS += \
     descriptor.h \
     descriptorfactory.h \
     utils.h
+
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../../../GnuWin32/lib/ -lgsl
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../../../GnuWin32/lib/ -lgsld
+else:unix: LIBS += -L$$PWD/../../../../../../GnuWin32/lib/ -lgsl
+
+INCLUDEPATH += $$PWD/../../../../../../GnuWin32/include
+DEPENDPATH += $$PWD/../../../../../../GnuWin32/include
