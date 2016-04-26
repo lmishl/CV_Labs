@@ -12,8 +12,6 @@
 #include <maskfactory.h>
 #include "pyramid.h"
 #include <descriptorfactory.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_blas.h>
 using namespace std;
 
 
@@ -31,17 +29,19 @@ int main()
 
 
     vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 2, "C:\\7\\blob1.tif");
-
     cout<<"blob1  "<< (int)clock() - start_time<<endl;
+
     vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 2, "C:\\7\\blob2.tif");
-
-
     cout<<"blob2  "<< (int)clock() - start_time<<endl;
 
-   gsl_matrix *A = gsl_matrix_alloc(8,8);
+
+
+
 
     vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
     DrawMatches(*myIm1, *myIm2, matches, "C:\\7\\Un.png");
+
+
 
     unsigned int search_time = (int)clock() - start_time; // искомое время
     cout<<"\ngood "<< search_time<<endl;
