@@ -75,9 +75,9 @@ Transformation::Transformation(vector<pair<KeyPoint, KeyPoint>> vec)
 //            cout <<gsl_matrix_get(V,i,j)<<" ";
 //    }
 
-//    cout<<endl <<"S"<<endl;
-//    for(int j = 0; j < 9; j++)
-//        cout <<gsl_vector_get(S,j)<<" ";
+    cout<<endl <<"S"<<endl;
+    for(int j = 0; j < 9; j++)
+        cout <<gsl_vector_get(S,j)<<" ";
 
 
 
