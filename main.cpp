@@ -18,27 +18,26 @@
 #define iter 100
 using namespace std;
 
-int* select4(int size)
+void select4(int size, int * forFill)
 {
-    int selected[4];
-    selected[0] = rand() % size;
+
+    forFill[0] = rand() % size;
 
     do
     {
-        selected[1] = rand() % size;
-    }while(selected[1] == selected[0]);
+        forFill[1] = rand() % size;
+    }while(forFill[1] == forFill[0]);
 
     do
     {
-        selected[2] = rand() % size;
-    }while(selected[2] == selected[0] || selected[2] == selected[1] );
+        forFill[2] = rand() % size;
+    }while(forFill[2] == forFill[0] || forFill[2] == forFill[1] );
 
     do
     {
-        selected[3] = rand() % size;
-    }while(selected[3] == selected[0] || selected[3] == selected[1] || selected[3] == selected[2]);
+        forFill[3] = rand() % size;
+    }while(forFill[3] == forFill[0] || forFill[3] == forFill[1] || forFill[3] == forFill[2]);
 
-    return selected;
 }
 
 Transformation Ransac(const vector<pair<KeyPoint, KeyPoint>> &matches)
@@ -58,7 +57,8 @@ Transformation Ransac(const vector<pair<KeyPoint, KeyPoint>> &matches)
 
         //выбираем 4 разные точки
         vector<pair<KeyPoint, KeyPoint>> cur;
-        int * selected = select4(size);
+        int selected[4];
+        select4(size, selected);
         for(int i = 0; i < 4; i++)
             cur.emplace_back(matches[selected[i]]);
 
