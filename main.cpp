@@ -96,6 +96,42 @@ Transformation Ransac(const vector<pair<KeyPoint, KeyPoint>> &matches)
     return bestT;
 }
 
+void DrawPanorama(const Image &_im1, const Image &_im2, Transformation t, const QString &_fileName)
+{
+    int wRes =  _im1.getWidth() * 2;
+    int hRes =  _im1.getHeight() * 2;
+    QImage result = QImage(wRes, hRes, QImage::Format_RGB32);
+    result.fill(0);
+    QPainter painter(&result);
+
+    painter.drawImage(0, 0, _im1.toQImage());
+
+
+    for(int i = 0; i < _im2.getWidth(); i++)
+    {
+        for(int j = 0; j < _im2.getHeight(); j++)
+        {
+            float x0 = i;
+            float y0 = j;
+
+            float newX = (t.H(0,0) * x0 + t.H(0,1) * y0 + t.H(0,2)) / (t.H(2,0) * x0 + t.H(2,1) * y0 + t.H(2,2));
+            float newY = (t.H(1,0) * x0 + t.H(1,1) * y0 + t.H(1,2)) / (t.H(2,0) * x0 + t.H(2,1) * y0 + t.H(2,2));
+
+            if(newX >= 0 && newX < hRes && newY >= 0 && newY < wRes)
+            {
+                int color = _im2.getPixel(i,j);
+                result.setPixel(newY, newX, qRgb(color, color, color));
+
+            }
+        }
+    }
+
+    painter.end();
+
+
+    result.save(_fileName);
+}
+
 
 int main()
 {
@@ -119,9 +155,11 @@ int main()
 
 
     vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
-    DrawMatches(*myIm1, *myIm2, matches, "C:\\7\\Un.png");
+   // DrawMatches(*myIm1, *myIm2, matches, "C:\\7\\Un.png");
 
     Transformation t = Ransac(matches);
+
+    DrawPanorama(*myIm1, *myIm2, t, "C:\\7\\Un.png");
 
     unsigned int search_time = (int)clock() - start_time; // искомое время
     cout<<"\ngood "<< search_time<<endl;
