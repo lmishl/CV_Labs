@@ -13,6 +13,9 @@
 #include "pyramid.h"
 #include <descriptorfactory.h>
 #include "transformation.h"
+
+#define eps 0.005
+#define iter 100
 using namespace std;
 
 int* select4(int size)
@@ -38,30 +41,59 @@ int* select4(int size)
     return selected;
 }
 
-Transformation Ransac(vector<pair<KeyPoint, KeyPoint>> matches)
+Transformation Ransac(const vector<pair<KeyPoint, KeyPoint>> &matches)
 {
-    if(matches.size() < 4 || iterCount == 0)
-        return NULL;
-
+    Transformation bestT;
     srand(time(0));
     int size = matches.size();
+    int bestInliers = 0;
 
 
+    if(matches.size() < 4)
+        return bestT;
 
 
-    //выбираем 4 разные точки
-    vector<pair<KeyPoint, KeyPoint>> cur;
-    int selected[4] = select4(size);
-    for(int i = 0; i < 4; i++)
-        cur.emplace_back(matches[selected[i]]);
+    for(int curIter = 0; curIter < iter; curIter++)
+    {
 
-    //строим модель трансформации
-    Transformation t(cur);
+        //выбираем 4 разные точки
+        vector<pair<KeyPoint, KeyPoint>> cur;
+        int * selected = select4(size);
+        for(int i = 0; i < 4; i++)
+            cur.emplace_back(matches[selected[i]]);
 
-    //считаем inliers
+        //строим модель трансформации
+        Transformation t(cur);
 
+        //считаем inliers
+        int inliers = 0;
+        for( auto pairK: matches)
+        {
+            float x0 = pairK.first.x;
+            float y0 = pairK.first.y;
+            float x1 = pairK.second.x;
+            float y1 = pairK.second.y;
 
+            float expectedX = (t.H(0,0) * x0 + t.H(0,1) * y0 + t.H(0,2)) / (t.H(2,0) * x0 + t.H(2,1) * y0 + t.H(2,2));
+            float expectedY = (t.H(1,0) * x0 + t.H(1,1) * y0 + t.H(1,2)) / (t.H(2,0) * x0 + t.H(2,1) * y0 + t.H(2,2));
 
+            float C = hypot(x1 - expectedX, y1 - expectedY);
+
+            if(C < eps)
+                inliers++;
+        }
+
+        if(inliers > bestInliers)
+        {
+            bestT = t;
+            bestInliers = inliers;
+        }
+
+        if(inliers > matches.size() / 2)
+            break;
+    }
+
+    return bestT;
 }
 
 
