@@ -14,7 +14,7 @@
 #include <descriptorfactory.h>
 #include "transformation.h"
 
-#define eps 0.005
+#define eps 1
 #define iter 5000
 using namespace std;
 
@@ -160,28 +160,28 @@ Transformation Ransac(const vector<pair<KeyPoint, KeyPoint>> &matches)
 
 void DrawPanorama(const Image &_im1, const Image &_im2, Transformation t, const QString &_fileName)
 {
-    int wRes =  _im1.getWidth() * 2;
-    int hRes =  _im1.getHeight() * 2;
+    int wRes =  _im2.getWidth() * 3;
+    int hRes =  _im2.getHeight() * 3;
     QImage result = QImage(wRes, hRes, QImage::Format_RGB32);
     result.fill(0);
     QPainter painter(&result);
 
-    painter.drawImage(0, 0, _im1.toQImage());
+    painter.drawImage(wRes / 3, hRes / 3, _im2.toQImage());
 
 
-    for(int i = 0; i < _im2.getHeight(); i++)
+    for(int i = 0; i < _im1.getHeight(); i++)
     {
-        for(int j = 0; j < _im2.getWidth(); j++)
+        for(int j = 0; j < _im1.getWidth(); j++)
         {
             float x0 = i;
             float y0 = j;
 
-            float newX = (t.H(0,0) * x0 + t.H(0,1) * y0 + t.H(0,2)) / (t.H(2,0) * x0 + t.H(2,1) * y0 + t.H(2,2));
-            float newY = (t.H(1,0) * x0 + t.H(1,1) * y0 + t.H(1,2)) / (t.H(2,0) * x0 + t.H(2,1) * y0 + t.H(2,2));
+            float newX = (t.H(0,0) * x0 + t.H(0,1) * y0 + t.H(0,2)) / (t.H(2,0) * x0 + t.H(2,1) * y0 + t.H(2,2)) + hRes / 3;
+            float newY = (t.H(1,0) * x0 + t.H(1,1) * y0 + t.H(1,2)) / (t.H(2,0) * x0 + t.H(2,1) * y0 + t.H(2,2)) + wRes / 3;
 
             if(newX >= 0 && newX < hRes && newY >= 0 && newY < wRes)
             {
-                int color = _im2.getPixel(i, j);
+                int color = _im1.getPixel(i, j);
                 result.setPixel(newY, newX, qRgb(color, color, color));
 
             }
@@ -219,8 +219,8 @@ int main()
     vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
     DrawMatches(*myIm1, *myIm2, matches, "C:\\8\\Un.png");
 
-    //Transformation t = Ransac(matches);
-    Transformation t = DebugRansac(matches,*myIm1, *myIm2, "C:\\8\\Debug.png");
+    Transformation t = Ransac(matches);
+    //Transformation t = DebugRansac(matches,*myIm1, *myIm2, "C:\\8\\Debug.png");
 
     DrawPanorama(*myIm1, *myIm2, t, "C:\\8\\Pan.png");
 

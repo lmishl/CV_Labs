@@ -34,6 +34,13 @@ Transformation::Transformation(vector<pair<KeyPoint, KeyPoint>> vec)
         gsl_matrix_set(A, i*2+1, 8 , -(vec[i].second).y);
     }
 
+//    cout <<endl<<"A"<<endl;
+//    for(int i = 0; i < 4; i++)
+//    {
+//        cout <<endl;
+//        cout <<vec[i].first.x<<" "<<vec[i].first.y<<" "<<vec[i].second.x<<" "<<vec[i].second.y<<" ";
+//    }
+
 
     gsl_matrix *ATA = gsl_matrix_alloc(9,9);
     //These functions compute the matrix-matrix product and sum C = \alpha op(A) op(B) + \beta C
@@ -58,26 +65,26 @@ Transformation::Transformation(vector<pair<KeyPoint, KeyPoint>> vec)
 
 
 
-//    cout <<endl<<"ATA"<<endl;
-//    for(int i = 0; i < 9; i++)
-//    {
-//        cout <<endl;
-//        for(int j = 0; j < 9; j++)
-//            cout <<gsl_matrix_get(ATA,i,j)<<" ";
-//    }
+    //    cout <<endl<<"ATA"<<endl;
+    //    for(int i = 0; i < 9; i++)
+    //    {
+    //        cout <<endl;
+    //        for(int j = 0; j < 9; j++)
+    //            cout <<gsl_matrix_get(ATA,i,j)<<" ";
+    //    }
 
-//    cout <<endl<<"V"<<endl;
+    //    cout <<endl<<"V"<<endl;
 
-//    for(int i = 0; i < 9; i++)
-//    {
-//        cout <<endl;
-//        for(int j = 0; j < 9; j++)
-//            cout <<gsl_matrix_get(V,i,j)<<" ";
-//    }
+    //    for(int i = 0; i < 9; i++)
+    //    {
+    //        cout <<endl;
+    //        for(int j = 0; j < 9; j++)
+    //            cout <<gsl_matrix_get(V,i,j)<<" ";
+    //    }
 
-    cout<<endl <<"S"<<endl;
-    for(int j = 0; j < 9; j++)
-        cout <<gsl_vector_get(S,j)<<" ";
+//    cout<<endl <<"S"<<endl;
+//    for(int j = 0; j < 9; j++)
+//        cout <<gsl_vector_get(S,j)<<" ";
 
 
 
