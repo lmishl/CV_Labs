@@ -151,11 +151,28 @@ Transformation Ransac(const vector<pair<KeyPoint, KeyPoint>> &matches)
             bestInliers = inliers;
         }
 
-        //        if(inliers > matches.size() / 2)
-        //            break;
     }
 
-    return bestT;
+    //а теперь уточним нашу модель трансф-и
+    vector<pair<KeyPoint, KeyPoint>> cur;
+    for( auto pairK: matches)
+    {
+        float x0 = pairK.first.x;
+        float y0 = pairK.first.y;
+        float x1 = pairK.second.x;
+        float y1 = pairK.second.y;
+
+        float expectedX = (bestT.H(0,0) * x0 + bestT.H(0,1) * y0 + bestT.H(0,2)) / (bestT.H(2,0) * x0 + bestT.H(2,1) * y0 + bestT.H(2,2));
+        float expectedY = (bestT.H(1,0) * x0 + bestT.H(1,1) * y0 + bestT.H(1,2)) / (bestT.H(2,0) * x0 + bestT.H(2,1) * y0 + bestT.H(2,2));
+
+        float C = hypot(x1 - expectedX, y1 - expectedY);
+
+        if(C < eps)
+            cur.emplace_back(pairK);
+    }
+
+
+    return Transformation(cur);
 }
 
 void DrawPanorama(const Image &_im1, const Image &_im2, Transformation t, const QString &_fileName)

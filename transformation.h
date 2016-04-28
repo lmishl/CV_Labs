@@ -14,8 +14,10 @@ public:
     float H(int i, int j) const
     {
         return h[i * 3 + j];
-    }
+    }    
+
 private:
     float h[9];
+    void FillGSLMatrix(const vector<pair<KeyPoint, KeyPoint> > &vec, gsl_matrix *A);
 };
 
