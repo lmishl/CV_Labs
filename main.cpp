@@ -14,7 +14,7 @@
 #include <descriptorfactory.h>
 #include "transformation.h"
 
-#define eps 1
+#define eps 10
 #define iter 5000
 using namespace std;
 
@@ -169,6 +169,10 @@ void DrawPanorama(const Image &_im1, const Image &_im2, Transformation t, const 
     painter.drawImage(wRes / 3, hRes / 3, _im2.toQImage());
 
 
+    QTransform transform;
+    transform.setMatrix(t.H(0,0), t.H(0,1), t.H(0,2), t.H(1,0), t.H(1,1), t.H(1,2), t.H(2,0), t.H(2,1), t.H(2,2));
+
+
     for(int i = 0; i < _im1.getHeight(); i++)
     {
         for(int j = 0; j < _im1.getWidth(); j++)
@@ -189,27 +193,71 @@ void DrawPanorama(const Image &_im1, const Image &_im2, Transformation t, const 
     }
 
     painter.end();
-
-
     result.save(_fileName);
 }
 
 
+void DrawPanorama2(const Image &_im1, const Image &_im2, Transformation t, const QString &_fileName)
+{
+    int wRes =  _im2.getWidth() * 3;
+    int hRes =  _im2.getHeight() * 3;
+    QImage result = QImage(wRes, hRes, QImage::Format_RGB32);
+    result.fill(0);
+    QPainter painter(&result);
+
+
+    // http://doc.crossplatform.ru/qt/4.7.x/qtransform.html
+    //     x' = m11*x + m21*y + dx
+    //     y' = m22*y + m12*x + dy
+    //     if (is not affine) {
+    //         w' = m13*x + m23*y + m33
+    //         x' /= w'
+    //         y' /= w'
+    //     }
+
+    //    QTransform transform(2, 0, 0,
+    //                         0 ,1, 0,
+    //                         0, 0, 1);
+
+    //должно быть так
+    //    QTransform transform(t.H(0,0), t.H(1,0), t.H(2,0),
+    //                         t.H(0,1), t.H(1,1), t.H(2,1),
+    //                         t.H(0,2), t.H(1,2), t.H(2,2));
+
+    //но ведь хрен!  у меня х и у поменяны местами
+    QTransform transform(t.H(1,1), t.H(0,1), t.H(2,1),
+                         t.H(1,0), t.H(0,0), t.H(2,0),
+                         t.H(1,2), t.H(0,2), t.H(2,2));
+
+
+    QTransform translationTransform(1, 0, 0, 0, 1, 0, wRes / 3, hRes / 3, 1);
+
+    transform*=translationTransform;
+
+    painter.drawImage(wRes / 3, hRes / 3, _im2.toQImage());     //рисуем 2
+    painter.setTransform(transform);                            //вводим трансформацию
+    painter.drawImage(0, 0, _im1.toQImage());                   //рисуем 1
+
+    painter.end();
+
+    result.save(_fileName);
+}
+
 int main()
 {
     unsigned int start_time =  clock(); // начальное время
-    QString fileName1 = "C:\\8\\1.png";
+    QString fileName1 = "C:\\8\\30.png";
     shared_ptr<Image> myIm1 = Image::fromFile(fileName1);
 
-    QString fileName2 = "C:\\8\\2.png";
+    QString fileName2 = "C:\\8\\31.png";
     shared_ptr<Image> myIm2 = Image::fromFile(fileName2);
 
 
 
-    vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 2, "C:\\8\\blob1.tif");
+    vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 1, "C:\\8\\blob1.tif");
     cout<<"blob1  "<< (int)clock() - start_time<<endl;
 
-    vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 2, "C:\\8\\blob2.tif");
+    vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 1, "C:\\8\\blob2.tif");
     cout<<"blob2  "<< (int)clock() - start_time<<endl;
 
 
@@ -223,6 +271,7 @@ int main()
     //Transformation t = DebugRansac(matches,*myIm1, *myIm2, "C:\\8\\Debug.png");
 
     DrawPanorama(*myIm1, *myIm2, t, "C:\\8\\Pan.png");
+    DrawPanorama2(*myIm1, *myIm2, t, "C:\\8\\Pan2.png");
 
     unsigned int search_time = (int)clock() - start_time; // искомое время
     cout<<"\ngood "<< search_time<<endl;

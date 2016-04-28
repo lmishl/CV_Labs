@@ -5,7 +5,7 @@ Transformation::Transformation()
     memset(h, 0, sizeof(h));
 }
 
-Transformation::Transformation(vector<pair<KeyPoint, KeyPoint>> vec)
+Transformation::Transformation(const vector<pair<KeyPoint, KeyPoint> > &vec)
 {
     //берём 4 соответствия, составляем матрицу А
     gsl_matrix *A = gsl_matrix_alloc(8,9);

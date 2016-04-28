@@ -10,7 +10,7 @@ class Transformation
 {
 public:
     Transformation();
-    Transformation(vector<pair<KeyPoint, KeyPoint>> vec);
+    Transformation(const vector<pair<KeyPoint, KeyPoint>> &vec);
     float H(int i, int j) const
     {
         return h[i * 3 + j];
