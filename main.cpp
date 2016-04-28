@@ -185,11 +185,6 @@ void DrawPanorama(const Image &_im1, const Image &_im2, Transformation t, const 
 
     painter.drawImage(wRes / 3, hRes / 3, _im2.toQImage());
 
-
-    QTransform transform;
-    transform.setMatrix(t.H(0,0), t.H(0,1), t.H(0,2), t.H(1,0), t.H(1,1), t.H(1,2), t.H(2,0), t.H(2,1), t.H(2,2));
-
-
     for(int i = 0; i < _im1.getHeight(); i++)
     {
         for(int j = 0; j < _im1.getWidth(); j++)
@@ -210,6 +205,38 @@ void DrawPanorama(const Image &_im1, const Image &_im2, Transformation t, const 
     }
 
     painter.end();
+    result.save(_fileName);
+}
+
+void DrawPanoramaColor(const QString &_imName1, const QString &_imName2, Transformation t, const QString &_fileName)
+{
+    QImage im1;
+    im1.load(_imName1);
+    QImage im2;
+    im2.load(_imName2);
+
+    int wRes =  im2.width() * 3;
+    int hRes =  im2.height() * 3;
+    QImage result = QImage(wRes, hRes, QImage::Format_RGB32);
+    result.fill(0);
+    QPainter painter(&result);
+
+
+    QTransform transform(t.H(1,1), t.H(0,1), t.H(2,1),
+                         t.H(1,0), t.H(0,0), t.H(2,0),
+                         t.H(1,2), t.H(0,2), t.H(2,2));
+
+
+    QTransform translationTransform(1, 0, 0, 0, 1, 0, wRes / 3, hRes / 3, 1);
+
+    transform *= translationTransform;
+
+    painter.drawImage(wRes / 3, hRes / 3, im2);     //рисуем 2
+    painter.setTransform(transform);                //вводим трансформацию
+    painter.drawImage(0, 0, im1);                   //рисуем 1
+
+    painter.end();
+
     result.save(_fileName);
 }
 
@@ -263,10 +290,10 @@ void DrawPanorama2(const Image &_im1, const Image &_im2, Transformation t, const
 int main()
 {
     unsigned int start_time =  clock(); // начальное время
-    QString fileName1 = "C:\\8\\30.png";
+    QString fileName1 = "C:\\8\\40.png";
     shared_ptr<Image> myIm1 = Image::fromFile(fileName1);
 
-    QString fileName2 = "C:\\8\\31.png";
+    QString fileName2 = "C:\\8\\41.png";
     shared_ptr<Image> myIm2 = Image::fromFile(fileName2);
 
 
@@ -289,6 +316,7 @@ int main()
 
     DrawPanorama(*myIm1, *myIm2, t, "C:\\8\\Pan.png");
     DrawPanorama2(*myIm1, *myIm2, t, "C:\\8\\Pan2.png");
+    DrawPanoramaColor(fileName1, fileName2, t, "C:\\8\\Pan2.png");
 
     unsigned int search_time = (int)clock() - start_time; // искомое время
     cout<<"\ngood "<< search_time<<endl;
