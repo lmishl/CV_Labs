@@ -348,7 +348,7 @@ int main()
         painter.begin(&zaz);
 
 
-        for(uint i=0; i<matches.size(); i++)
+        for(uint i = 0; i < matches.size(); i++)
         {
             QPen qqq(QColor(rand() % 255, rand() % 255, rand() % 255));
             painter.setPen(qqq);
@@ -357,14 +357,14 @@ int main()
             KeyPoint p2 = matches[i].second;
 
 
-            float scale = p2.sigma / p1.sigma;
+            float scale = p2.sigma / p1.sigma;//pow(2, p2.numberOctave - p1.numberOctave) * ();
 
             float angle = p2.angle - p1.angle;
 
             //найдём левый верхний угол образца на 2ой картинке
 
             //1 - повернули точку образца на угол angle
-            auto pp0 = rotate(0, 0, p1.globX(), p1.globY(), angle);
+            auto pp0 = rotate(0, 0, p1.globX(), p1.globY(), -angle);
 
             //2 - найдём начало образца на изобр-и
             float x0 = p2.globX() - pp0.first * scale;
@@ -378,25 +378,25 @@ int main()
             int h = myIm1->getHeight() * scale;
 
             // найдём повёрнутые координаты на образце
-            auto pp1 = rotate(0, 0, 0, w, angle);
+            auto pp1 = rotate(0, 0, 0, w, -angle);
 
             //найдём повёрнутые координаты на изобр-и
-            float x1 = x0 + pp1.first * scale;
-            float y1 = y0 + pp1.second * scale;
+            float x1 = x0 + pp1.first;
+            float y1 = y0 + pp1.second;
 
             // найдём повёрнутые координаты на образце
-            auto pp2 = rotate(0, 0, h, w, angle);
+            auto pp2 = rotate(0, 0, h, w, -angle);
 
             //найдём повёрнутые координаты на изобр-и
-            float x2 = x0 + pp2.first * scale;
-            float y2 = y0 + pp2.second * scale;
+            float x2 = x0 + pp2.first;
+            float y2 = y0 + pp2.second;
 
             // найдём повёрнутые координаты на образце
-            auto pp3 = rotate(0, 0, h, 0, angle);
+            auto pp3 = rotate(0, 0, h, 0, -angle);
 
             //найдём повёрнутые координаты на изобр-и
-            float x3 = x0 + pp3.first * scale;
-            float y3 = y0 + pp3.second * scale;
+            float x3 = x0 + pp3.first;
+            float y3 = y0 + pp3.second;
 
 
             painter.drawLine(y0, x0, y1, x1);

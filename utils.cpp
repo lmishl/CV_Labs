@@ -1,7 +1,7 @@
 #include "utils.h"
 
 
-///Поворачивает точку (x1,y1) вокруг (x0,y0) на угол angle
+///Поворачивает точку (x1,y1) вокруг (x0,y0) на угол angle по часовой стрелке
 pair<float, float> rotate(float x0, float y0, float x1, float y1, float angle)
 {
     if(x0 == x1 && y0 == y1)
