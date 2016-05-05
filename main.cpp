@@ -347,8 +347,9 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
     //x, y - по 2%    angle по 18градусов, scale по log2 + 2
     int w = _im2.getWidth();
     int h = _im2.getHeight();
-    //float xSize = 2, ySize = 2, aSize = 10, sSize = 0.2;
-    int xBins = 50, yBins = 50, aBins = 24, sBins = 10;
+
+    //эта сука может падать, если размер будет больше
+    const int xBins = 50, yBins = 50, aBins = 24, sBins = 8;
 
 
     //
@@ -368,18 +369,18 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
         KeyPoint p2 = _matches[i].second;
 
 
-        float scale = p2.sigma / p1.sigma;
+        float scale = p2.sigma / p1.sigma;//pow(2, p2.numberOctave - p1.numberOctave) * ();
 
         float angle = p2.angle - p1.angle;
 
         //найдём левый верхний угол образца на 2ой картинке
 
         //1 - повернули точку образца на угол angle
-        auto qq = rotate(0, 0, p1.globX(), p1.globY(), angle);
+        auto pp0 = rotate(0, 0, p1.globX(), p1.globY(), -angle);
 
         //2 - найдём начало образца на изобр-и
-        float x = p2.globX() - qq.first * scale;
-        float y = p2.globY() - qq.second  * scale;
+        float x = p2.globX() - pp0.first * scale;
+        float y = p2.globY() - pp0.second * scale;
 
 
         //значения получили, раскидываем по корзинам
@@ -442,13 +443,16 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
                 {
                     if(maxVec == accum[a][b][c][d])
                     {
-                        int xx = h / xBins * (a + 0.5);
-                        int yy = w / yBins * (b + 0.5);
-                        int aa = 360 / aBins * (c + 0.5);
+                        cout<<h<<"  "<<w<<endl;
+
+
+                        int xx = 1.0 * h / xBins * (a + 0.5);
+                        int yy = 1.0 * w / yBins * (b + 0.5);
+                        int aa = 360.0 / aBins * (c + 0.5);
                         float ss =  pow(2, d - 1.5);// * sqrt(2);
-                        cout<<xx<<endl<<yy<<endl<<aa<<endl<<ss<<endl<<"---------"<<endl;
+                        cout<<xx<<"  "<<yy<<"  "<<aa<<"  "<<ss<<endl<<"---------"<<endl;
                         DrawModel(xx, yy, aa, ss, _im1, _im2, "C:\\9\\bydlo.png");
-                        cout<<a<<endl<<b<<endl<<c<<endl<<d<<endl;
+                        cout<<a<<"  "<<b<<"  "<<c<<"  "<<d<<endl;
 
                         break;
                     }
@@ -500,6 +504,8 @@ void DrawModels(shared_ptr<Image> myIm1, shared_ptr<Image> myIm2, const vector<p
         //2 - найдём начало образца на изобр-и
         float x0 = p2.globX() - pp0.first * scale;
         float y0 = p2.globY() - pp0.second * scale;
+
+         painter.drawEllipse(QPoint(y0, x0), 2, 2);
 
 
 
@@ -553,10 +559,10 @@ int main()
 
 
 
-    vector<Descriptor> descs1 = findBlobs(*(myIm1->ot0do1()), 1, "C:\\9\\blob1.tif");
+    vector<Descriptor> descs1 = findBlobs(*(myIm1->ot0do1()), 0, "C:\\9\\blob1.tif");
     cout<<"blob1  "<< (int)clock() - start_time<<endl;
 
-    vector<Descriptor> descs2 = findBlobs(*(myIm2->ot0do1()), 1, "C:\\9\\blob2.tif");
+    vector<Descriptor> descs2 = findBlobs(*(myIm2->ot0do1()), 0, "C:\\9\\blob2.tif");
     cout<<"blob2  "<< (int)clock() - start_time<<endl;
 
 
@@ -564,10 +570,11 @@ int main()
 
 
     vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
-   // DrawMatches(*myIm1, *myIm2, matches, "C:\\9\\Un.png");
+    DrawMatches(*myIm1, *myIm2, matches, "C:\\9\\Un.png");
 
-  //  DrawModels(myIm1, myIm2, matches, "C:\\9\\temp.png");
+    DrawModels(myIm1, myIm2, matches, "C:\\9\\temp.png");
     Transformation t = Hough(matches, *myIm1, *myIm2);
+   // Transformation t = Ransac(matches);
 
     DrawPanoramaColor(fileName1, fileName2, t, "C:\\9\\Pan2.png");
 
