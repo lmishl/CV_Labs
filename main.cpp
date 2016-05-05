@@ -287,40 +287,19 @@ void DrawPanorama2(const Image &_im1, const Image &_im2, Transformation t, const
     result.save(_fileName);
 }
 
-void DrawModel(int x, int y, int a, int s, const Image &_im)
+Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &matches)
 {
-    QImage zaz = _im.toQImage();
-    QPainter painter;
-    painter.begin(&zaz);
-
-}
+//параметры
+    float xSize = 2, ySize = 2, aSize = 10, sSize = 0.2;
 
 
-Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Image &_im2)
-{
-    //параметры
-    //x, y - по 5%    angle по 18градусов, scale по log2 + 2
-    int w = _im2.getWidth();
-    int h = _im2.getHeight();
-    //float xSize = 2, ySize = 2, aSize = 10, sSize = 0.2;
-    int xBins = 20, yBins = 20, aBins = 20, sBins = 10;
+    //должно быть длина/xSize
+    int accum[300][300][360 / aSize][50];
 
-
-    //
-    int accum[xBins][yBins][aBins][sBins];
-    for(int a = 0; a < xBins; a++)
-        for(int b = 0; b < yBins; b++)
-            for(int c = 0; c < aBins; c++)
-                for(int d = 0; d < sBins; d++)
-                    accum[a][b][c][d] = -1;
-
-    vector<vector<uint>> votes;
-
-    int curList = 0;
-    for(uint i = 0; i < _matches.size(); i++)
+    for(uint i=0; i<matches.size(); i++)
     {
-        KeyPoint p1 = _matches[i].first;
-        KeyPoint p2 = _matches[i].second;
+        KeyPoint p1 = matches[i].first;
+        KeyPoint p2 = matches[i].second;
 
 
         float scale = p2.sigma / p1.sigma;
@@ -338,84 +317,33 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
 
 
         //значения получили, раскидываем по корзинам
-        int xBin = floor(x / h * 20 + 0.5);
-        int yBin = floor(y / w * 20 + 0.5);
-        int aBin = floor(angle / 20 + 0.5);
-        int sBin = floor(log2(scale) + 2.5);
+        int xBin = floor(x / xSize + 0.5);
+        int yBin = floor(y / ySize + 0.5);
+        int aBin = floor(angle / aSize + 0.5);
+        int sBin = floor(scale / sSize + 0.5);
 
-        for(int xx = xBin - 1; xx <= xBin; xx++ )
-        {
-            if(xx >= xBins || xx < 0)
-                continue;
-            for(int yy = yBin - 1; yy <= yBin; yy++ )
-            {
-                if(yy >= yBins || yy < 0)
-                    continue;
-                for(int aa = aBin - 1; aa <= aBin; aa++ )
-                {
-                    int ang = myProc(aa, aBins);
-                    for(int ss = sBin - 1; ss <= sBin && ss < sBins && ss >= 0; ss++ )
-                    {
-                        if(ss >= sBins || ss < 0)
-                            continue;
-
-                        if(accum[xx][yy][ang][ss] == -1)
-                        {
-                            accum[xx][yy][ang][ss] = curList++;
-                            vector<uint> temp;
-                            temp.emplace_back(i);
-                            votes.emplace_back(temp);
-                        }
-                        else
-                            votes[accum[xx][yy][ang][ss]].emplace_back(i);
-                    }
-                }
-            }
-        }
+         for(int xx = xBin - 1; xx <= xBin; xx++ )
+             for(int yy = yBin - 1; yy <= yBin; yy++ )
+                 for(int aa = aBin - 1; aa <= aBin; aa++ )
+                 {
+                     int ang = myProc(aa, aSize);
+                     for(int ss = sBin - 1; ss <= sBin; ss++ )
+                         accum[xx][yy][ang][ss]++;
+                 }
 
 
 
     }
 
     //ищем максимум
-    int maxVec = 0;
-    int maxSize = votes[0].size();
-    for(uint i = 1; i < votes.size(); i++)
-    {
-        if(votes[i].size() > maxSize)
-        {
-            maxSize = votes[i].size();
-            maxVec = i;
-        }
-    }
 
-    //быдло вставка --- рисуем максимум
-    for(int a = 0; a < xBins; a++)
-        for(int b = 0; b < yBins; b++)
-            for(int c = 0; c < aBins; c++)
-                for(int d = 0; d < sBins; d++)
-                {
-                    if(maxVec == accum[a][b][c][d])
-                        DrawModel(a, b, c, d, _im2);
-                    break;
-                }
-
-
-
-    //Соберём вектор соответствий
-    vector<pair<KeyPoint, KeyPoint>> vec;
-    for(uint i = 1; i < votes[maxVec].size(); i++)
-        vec.emplace_back(_matches[votes[maxVec][i]]);
-
+    //ищем инлаеров
 
     //строим модель
 
 
-    return Transformation(vec);
+    return Transformation();
 }
-
-
-
 
 void DrawModels(shared_ptr<Image> myIm2, shared_ptr<Image> myIm1, vector<pair<KeyPoint, KeyPoint>> matches, const QString &_fileName)
 {
@@ -499,10 +427,10 @@ int main()
 
 
 
-    vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 0, "C:\\9\\blob1.tif");
+    vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 1, "C:\\9\\blob1.tif");
     cout<<"blob1  "<< (int)clock() - start_time<<endl;
 
-    vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 0, "C:\\9\\blob2.tif");
+    vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 1, "C:\\9\\blob2.tif");
     cout<<"blob2  "<< (int)clock() - start_time<<endl;
 
 
@@ -513,9 +441,8 @@ int main()
     DrawMatches(*myIm1, *myIm2, matches, "C:\\9\\Un.png");
 
     DrawModels(myIm2, myIm1, matches, "C:\\9\\temp.png");
-    Transformation t = Hough(matches, *myIm2);
 
-    DrawPanoramaColor(fileName1, fileName2, t, "C:\\9\\Pan2.png");
+    // DrawPanoramaColor(fileName1, fileName2, t, "C:\\9\\Pan2.png");
 
     unsigned int search_time = (int)clock() - start_time; // искомое время
     cout<<"\ngood "<< search_time<<endl;
