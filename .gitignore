@@ -6,3 +6,4 @@ object_script.Lab1.Debug
 *.exe
 Makefile
 *.user
+Lab1.pro.user
