@@ -341,6 +341,79 @@ void DrawModel(int x, int y, int a, float s, const Image &_im1, const Image &_im
 }
 
 
+void DrawModels( const Image &myIm1,  const Image &myIm2, const vector<pair<KeyPoint, KeyPoint>> &matches, const QString &_fileName)
+{
+
+    QImage zaz = myIm2.toQImage();
+    QPainter painter;
+    painter.begin(&zaz);
+
+
+    for(uint i = 0; i < matches.size(); i++)
+    {
+        QPen qqq(QColor(rand() % 255, rand() % 255, rand() % 255));
+        painter.setPen(qqq);
+
+        KeyPoint p1 = matches[i].first;
+        KeyPoint p2 = matches[i].second;
+
+
+        float scale = p2.sigma / p1.sigma;//pow(2, p2.numberOctave - p1.numberOctave) * ();
+
+        float angle = p2.angle - p1.angle;
+
+        //найдём левый верхний угол образца на 2ой картинке
+
+        //1 - повернули точку образца на угол angle
+        auto pp0 = rotate(0, 0, p1.globX(), p1.globY(), -angle);
+
+        //2 - найдём начало образца на изобр-и
+        float x0 = p2.globX() - pp0.first * scale;
+        float y0 = p2.globY() - pp0.second * scale;
+
+         painter.drawEllipse(QPoint(y0, x0), 2, 2);
+
+
+
+
+        //теперь найдём другие 3 точки прямоугольника
+        int w = myIm1.getWidth() * scale;
+        int h = myIm1.getHeight() * scale;
+
+        // найдём повёрнутые координаты на образце
+        auto pp1 = rotate(0, 0, 0, w, -angle);
+
+        //найдём повёрнутые координаты на изобр-и
+        float x1 = x0 + pp1.first;
+        float y1 = y0 + pp1.second;
+
+        // найдём повёрнутые координаты на образце
+        auto pp2 = rotate(0, 0, h, w, -angle);
+
+        //найдём повёрнутые координаты на изобр-и
+        float x2 = x0 + pp2.first;
+        float y2 = y0 + pp2.second;
+
+        // найдём повёрнутые координаты на образце
+        auto pp3 = rotate(0, 0, h, 0, -angle);
+
+        //найдём повёрнутые координаты на изобр-и
+        float x3 = x0 + pp3.first;
+        float y3 = y0 + pp3.second;
+
+
+        painter.drawLine(y0, x0, y1, x1);
+        painter.drawLine(y1, x1, y2, x2);
+        painter.drawLine(y2, x2, y3, x3);
+        painter.drawLine(y3, x3, y0, x0);
+
+
+    }
+    painter.end();
+    zaz.save(_fileName);
+
+}
+
 Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Image &_im1, const Image &_im2)
 {
     //параметры
@@ -428,7 +501,7 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
     int maxSize = votes[0].size();
     for(uint i = 1; i < votes.size(); i++)
     {
-        if(votes[i].size() > maxSize)
+        if(votes[i].size() >= maxSize)
         {
             maxSize = votes[i].size();
             maxVec = i;
@@ -467,6 +540,8 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
 
 
     //строим модель
+    DrawMatches(_im1, _im2, vec, "C:\\9\\votes.png");
+    DrawModels(_im1, _im2, vec, "C:\\9\\votesModels.png");
 
 
     return Transformation(vec);
@@ -475,78 +550,7 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
 
 
 
-void DrawModels(shared_ptr<Image> myIm1, shared_ptr<Image> myIm2, const vector<pair<KeyPoint, KeyPoint>> &matches, const QString &_fileName)
-{
 
-    QImage zaz = myIm2->toQImage();
-    QPainter painter;
-    painter.begin(&zaz);
-
-
-    for(uint i = 0; i < matches.size(); i++)
-    {
-        QPen qqq(QColor(rand() % 255, rand() % 255, rand() % 255));
-        painter.setPen(qqq);
-
-        KeyPoint p1 = matches[i].first;
-        KeyPoint p2 = matches[i].second;
-
-
-        float scale = p2.sigma / p1.sigma;//pow(2, p2.numberOctave - p1.numberOctave) * ();
-
-        float angle = p2.angle - p1.angle;
-
-        //найдём левый верхний угол образца на 2ой картинке
-
-        //1 - повернули точку образца на угол angle
-        auto pp0 = rotate(0, 0, p1.globX(), p1.globY(), -angle);
-
-        //2 - найдём начало образца на изобр-и
-        float x0 = p2.globX() - pp0.first * scale;
-        float y0 = p2.globY() - pp0.second * scale;
-
-         painter.drawEllipse(QPoint(y0, x0), 2, 2);
-
-
-
-
-        //теперь найдём другие 3 точки прямоугольника
-        int w = myIm1->getWidth() * scale;
-        int h = myIm1->getHeight() * scale;
-
-        // найдём повёрнутые координаты на образце
-        auto pp1 = rotate(0, 0, 0, w, -angle);
-
-        //найдём повёрнутые координаты на изобр-и
-        float x1 = x0 + pp1.first;
-        float y1 = y0 + pp1.second;
-
-        // найдём повёрнутые координаты на образце
-        auto pp2 = rotate(0, 0, h, w, -angle);
-
-        //найдём повёрнутые координаты на изобр-и
-        float x2 = x0 + pp2.first;
-        float y2 = y0 + pp2.second;
-
-        // найдём повёрнутые координаты на образце
-        auto pp3 = rotate(0, 0, h, 0, -angle);
-
-        //найдём повёрнутые координаты на изобр-и
-        float x3 = x0 + pp3.first;
-        float y3 = y0 + pp3.second;
-
-
-        painter.drawLine(y0, x0, y1, x1);
-        painter.drawLine(y1, x1, y2, x2);
-        painter.drawLine(y2, x2, y3, x3);
-        painter.drawLine(y3, x3, y0, x0);
-
-
-    }
-    painter.end();
-    zaz.save(_fileName);
-
-}
 
 int main()
 {
@@ -572,7 +576,7 @@ int main()
     vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
     DrawMatches(*myIm1, *myIm2, matches, "C:\\9\\Un.png");
 
-    DrawModels(myIm1, myIm2, matches, "C:\\9\\temp.png");
+    DrawModels(*myIm1, *myIm2, matches, "C:\\9\\temp.png");
     Transformation t = Hough(matches, *myIm1, *myIm2);
    // Transformation t = Ransac(matches);
 
