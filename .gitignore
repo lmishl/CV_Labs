@@ -1,0 +1,8 @@
+*.user
+*.o
+Makefile.Debug
+*.Release
+object_script.Lab1.Debug
+*.exe
+Makefile
+*.user
