@@ -170,12 +170,12 @@ shared_ptr<Image> Image::ot0do1() const
 {
     shared_ptr<Image> result = make_shared<Image>(height, width);
 
-    for(int i=0; i< height; i++)
+    for(int i = 0; i < height; i++)
     {
-        for(int j=0; j<width; j++)
+        for(int j = 0; j < width; j++)
         {
-            float val = getPixel(i,j) / 255;
-            result->setPixel(i,j,val);
+            float val = getPixel(i, j) / 255;
+            result->setPixel(i, j, val);
         }
     }
     return result;

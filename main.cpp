@@ -348,7 +348,7 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
     int w = _im2.getWidth();
     int h = _im2.getHeight();
     //float xSize = 2, ySize = 2, aSize = 10, sSize = 0.2;
-    const int xBins = 50, yBins = 50, aBins = 24, sBins = 10;
+    int xBins = 50, yBins = 50, aBins = 24, sBins = 10;
 
 
     //
@@ -553,10 +553,10 @@ int main()
 
 
 
-    vector<Descriptor> descs1 = findBlobs(*myIm1->ot0do1(), 0, "C:\\9\\blob1.tif");
+    vector<Descriptor> descs1 = findBlobs(*(myIm1->ot0do1()), 1, "C:\\9\\blob1.tif");
     cout<<"blob1  "<< (int)clock() - start_time<<endl;
 
-    vector<Descriptor> descs2 = findBlobs(*myIm2->ot0do1(), 0, "C:\\9\\blob2.tif");
+    vector<Descriptor> descs2 = findBlobs(*(myIm2->ot0do1()), 1, "C:\\9\\blob2.tif");
     cout<<"blob2  "<< (int)clock() - start_time<<endl;
 
 
@@ -569,7 +569,7 @@ int main()
   //  DrawModels(myIm1, myIm2, matches, "C:\\9\\temp.png");
     Transformation t = Hough(matches, *myIm1, *myIm2);
 
-  //  DrawPanoramaColor(fileName1, fileName2, t, "C:\\9\\Pan2.png");
+    DrawPanoramaColor(fileName1, fileName2, t, "C:\\9\\Pan2.png");
 
     unsigned int search_time = (int)clock() - start_time; // искомое время
     cout<<"\ngood "<< search_time<<endl;
