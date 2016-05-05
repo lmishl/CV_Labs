@@ -287,23 +287,68 @@ void DrawPanorama2(const Image &_im1, const Image &_im2, Transformation t, const
     result.save(_fileName);
 }
 
-void DrawModel(int x, int y, int a, int s, const Image &_im)
+void DrawModel(int x, int y, int a, float s, const Image &_im1, const Image &_im2, const QString &_fileName)
 {
-    QImage zaz = _im.toQImage();
+    QImage zaz = _im2.toQImage();
     QPainter painter;
     painter.begin(&zaz);
+    QPen qqq(QColor(rand() % 255, rand() % 255, rand() % 255));
+    painter.setPen(qqq);
+
+    float scale = s;
+    float angle = a;
+    float x0 = x;
+    float y0 = y;
+
+
+
+
+    //теперь найдём другие 3 точки прямоугольника
+    int w = _im1.getWidth() * scale;
+    int h = _im1.getHeight() * scale;
+
+    // найдём повёрнутые координаты на образце
+    auto pp1 = rotate(0, 0, 0, w, -angle);
+
+    //найдём повёрнутые координаты на изобр-и
+    float x1 = x0 + pp1.first;
+    float y1 = y0 + pp1.second;
+
+    // найдём повёрнутые координаты на образце
+    auto pp2 = rotate(0, 0, h, w, -angle);
+
+    //найдём повёрнутые координаты на изобр-и
+    float x2 = x0 + pp2.first;
+    float y2 = y0 + pp2.second;
+
+    // найдём повёрнутые координаты на образце
+    auto pp3 = rotate(0, 0, h, 0, -angle);
+
+    //найдём повёрнутые координаты на изобр-и
+    float x3 = x0 + pp3.first;
+    float y3 = y0 + pp3.second;
+
+
+    painter.drawLine(y0, x0, y1, x1);
+    painter.drawLine(y1, x1, y2, x2);
+    painter.drawLine(y2, x2, y3, x3);
+    painter.drawLine(y3, x3, y0, x0);
+
+    painter.end();
+    zaz.save(_fileName);
+
 
 }
 
 
-Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Image &_im2)
+Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Image &_im1, const Image &_im2)
 {
     //параметры
-    //x, y - по 5%    angle по 18градусов, scale по log2 + 2
+    //x, y - по 2%    angle по 18градусов, scale по log2 + 2
     int w = _im2.getWidth();
     int h = _im2.getHeight();
     //float xSize = 2, ySize = 2, aSize = 10, sSize = 0.2;
-    int xBins = 20, yBins = 20, aBins = 20, sBins = 10;
+    const int xBins = 50, yBins = 50, aBins = 24, sBins = 10;
 
 
     //
@@ -338,9 +383,9 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
 
 
         //значения получили, раскидываем по корзинам
-        int xBin = floor(x / h * 20 + 0.5);
-        int yBin = floor(y / w * 20 + 0.5);
-        int aBin = floor(angle / 20 + 0.5);
+        int xBin = floor(x / h * xBins + 0.5);
+        int yBin = floor(y / w * yBins + 0.5);
+        int aBin = floor(angle / 360 * aBins + 0.5);
         int sBin = floor(log2(scale) + 2.5);
 
         for(int xx = xBin - 1; xx <= xBin; xx++ )
@@ -396,8 +441,17 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
                 for(int d = 0; d < sBins; d++)
                 {
                     if(maxVec == accum[a][b][c][d])
-                        DrawModel(a, b, c, d, _im2);
-                    break;
+                    {
+                        int xx = h / xBins * (a + 0.5);
+                        int yy = w / yBins * (b + 0.5);
+                        int aa = 360 / aBins * (c + 0.5);
+                        float ss =  pow(2, d - 1.5);// * sqrt(2);
+                        cout<<xx<<endl<<yy<<endl<<aa<<endl<<ss<<endl<<"---------"<<endl;
+                        DrawModel(xx, yy, aa, ss, _im1, _im2, "C:\\9\\bydlo.png");
+                        cout<<a<<endl<<b<<endl<<c<<endl<<d<<endl;
+
+                        break;
+                    }
                 }
 
 
@@ -417,7 +471,7 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
 
 
 
-void DrawModels(shared_ptr<Image> myIm2, shared_ptr<Image> myIm1, vector<pair<KeyPoint, KeyPoint>> matches, const QString &_fileName)
+void DrawModels(shared_ptr<Image> myIm1, shared_ptr<Image> myIm2, const vector<pair<KeyPoint, KeyPoint>> &matches, const QString &_fileName)
 {
 
     QImage zaz = myIm2->toQImage();
@@ -510,12 +564,12 @@ int main()
 
 
     vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
-    DrawMatches(*myIm1, *myIm2, matches, "C:\\9\\Un.png");
+   // DrawMatches(*myIm1, *myIm2, matches, "C:\\9\\Un.png");
 
-    DrawModels(myIm2, myIm1, matches, "C:\\9\\temp.png");
-    Transformation t = Hough(matches, *myIm2);
+  //  DrawModels(myIm1, myIm2, matches, "C:\\9\\temp.png");
+    Transformation t = Hough(matches, *myIm1, *myIm2);
 
-    DrawPanoramaColor(fileName1, fileName2, t, "C:\\9\\Pan2.png");
+  //  DrawPanoramaColor(fileName1, fileName2, t, "C:\\9\\Pan2.png");
 
     unsigned int search_time = (int)clock() - start_time; // искомое время
     cout<<"\ngood "<< search_time<<endl;
