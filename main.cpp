@@ -422,7 +422,7 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
     int h = _im2.getHeight();
 
     //эта сука может падать, если размер будет больше
-    const int xBins = 50, yBins = 50, aBins = 24, sBins = 8;
+    const int xBins = 50, yBins = 50, aBins = 20, sBins = 10;
 
 
     //
@@ -456,11 +456,13 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
         float y = p2.globY() - pp0.second * scale;
 
 
+        //log_a_(b) =  log_c_(b) / log_c_(a)
+
         //значения получили, раскидываем по корзинам
         int xBin = floor(x / h * xBins + 0.5);
         int yBin = floor(y / w * yBins + 0.5);
         int aBin = floor(angle / 360 * aBins + 0.5);
-        int sBin = floor(log2(scale) + 2.5);
+        int sBin = floor(log2(scale) / log2(1.25) + 4.5); //log2(scale) + 2.5);
 
         for(int xx = xBin - 1; xx <= xBin; xx++ )
         {
@@ -505,6 +507,7 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
         {
             maxSize = votes[i].size();
             maxVec = i;
+            cout<<"max "<<maxSize<<endl;
         }
     }
 
@@ -522,7 +525,7 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
                         int xx = 1.0 * h / xBins * (a + 0.5);
                         int yy = 1.0 * w / yBins * (b + 0.5);
                         int aa = 360.0 / aBins * (c + 0.5);
-                        float ss =  pow(2, d - 1.5);// * sqrt(2);
+                        float ss =  pow(1.25, d - 3.5);// * sqrt(2);
                         cout<<xx<<"  "<<yy<<"  "<<aa<<"  "<<ss<<endl<<"---------"<<endl;
                         DrawModel(xx, yy, aa, ss, _im1, _im2, "C:\\9\\bydlo.png");
                         cout<<a<<"  "<<b<<"  "<<c<<"  "<<d<<endl;
@@ -539,9 +542,11 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
         vec.emplace_back(_matches[votes[maxVec][i]]);
 
 
-    //строим модель
+    //выводим что нашли
     DrawMatches(_im1, _im2, vec, "C:\\9\\votes.png");
     DrawModels(_im1, _im2, vec, "C:\\9\\votesModels.png");
+
+
 
 
     return Transformation(vec);
