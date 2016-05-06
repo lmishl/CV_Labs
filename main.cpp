@@ -171,7 +171,7 @@ Transformation Ransac(const vector<pair<KeyPoint, KeyPoint>> &matches)
             cur.emplace_back(pairK);
     }
 
-
+    cout<<cur.size();
     return Transformation(cur);
 }
 
@@ -287,6 +287,28 @@ void DrawPanorama2(const Image &_im1, const Image &_im2, Transformation t, const
     result.save(_fileName);
 }
 
+void getModelParameters(const pair<KeyPoint, KeyPoint> &match, float *x, float *y, float *a, float *s)
+{
+    KeyPoint p1 = match.first;
+    KeyPoint p2 = match.second;
+
+
+    float scale = p2.sigma / p1.sigma;//pow(2, p2.numberOctave - p1.numberOctave) * ();
+
+    float angle = myProc(p2.angle - p1.angle, 360);
+
+    //найдём левый верхний угол образца на 2ой картинке
+
+    //float1 - повернули точку образца на угол angle
+    auto pp0 = rotate(0, 0, p1.globX(), p1.globY(), -angle);
+
+    //2 - найдём начало образца на изобр-и и запишем всё
+    *x = p2.globX() - pp0.first * scale;
+    *y = p2.globY() - pp0.second * scale;
+    *a = angle;
+    *s = scale;
+}
+
 void DrawModel(int x, int y, int a, float s, const Image &_im1, const Image &_im2, const QString &_fileName)
 {
     QImage zaz = _im2.toQImage();
@@ -300,7 +322,7 @@ void DrawModel(int x, int y, int a, float s, const Image &_im1, const Image &_im
     float x0 = x;
     float y0 = y;
 
-
+     painter.drawEllipse(QPoint(y0, x0), 2, 2);
 
 
     //теперь найдём другие 3 точки прямоугольника
@@ -341,7 +363,7 @@ void DrawModel(int x, int y, int a, float s, const Image &_im1, const Image &_im
 }
 
 
-void DrawModels( const Image &myIm1,  const Image &myIm2, const vector<pair<KeyPoint, KeyPoint>> &matches, const QString &_fileName)
+void DrawModels( const Image &myIm1,  const Image &myIm2, const vector<pair<KeyPoint, KeyPoint>> &_matches, const QString &_fileName)
 {
 
     QImage zaz = myIm2.toQImage();
@@ -349,27 +371,13 @@ void DrawModels( const Image &myIm1,  const Image &myIm2, const vector<pair<KeyP
     painter.begin(&zaz);
 
 
-    for(uint i = 0; i < matches.size(); i++)
+    for(uint i = 0; i < _matches.size(); i++)
     {
         QPen qqq(QColor(rand() % 255, rand() % 255, rand() % 255));
         painter.setPen(qqq);
 
-        KeyPoint p1 = matches[i].first;
-        KeyPoint p2 = matches[i].second;
-
-
-        float scale = p2.sigma / p1.sigma;//pow(2, p2.numberOctave - p1.numberOctave) * ();
-
-        float angle = p2.angle - p1.angle;
-
-        //найдём левый верхний угол образца на 2ой картинке
-
-        //1 - повернули точку образца на угол angle
-        auto pp0 = rotate(0, 0, p1.globX(), p1.globY(), -angle);
-
-        //2 - найдём начало образца на изобр-и
-        float x0 = p2.globX() - pp0.first * scale;
-        float y0 = p2.globY() - pp0.second * scale;
+        float scale, angle, x0, y0;
+        getModelParameters(_matches[i], &x0, &y0, &angle, &scale);
 
         painter.drawEllipse(QPoint(y0, x0), 2, 2);
 
@@ -414,27 +422,7 @@ void DrawModels( const Image &myIm1,  const Image &myIm2, const vector<pair<KeyP
 
 }
 
-void getModelParameters(const pair<KeyPoint, KeyPoint> &match, float *x, float *y, float *a, float *s)
-{
-    KeyPoint p1 = match.first;
-    KeyPoint p2 = match.second;
 
-
-    float scale = p2.sigma / p1.sigma;//pow(2, p2.numberOctave - p1.numberOctave) * ();
-
-    float angle = p2.angle - p1.angle;
-
-    //найдём левый верхний угол образца на 2ой картинке
-
-    //float1 - повернули точку образца на угол angle
-    auto pp0 = rotate(0, 0, p1.globX(), p1.globY(), -angle);
-
-    //2 - найдём начало образца на изобр-и и запишем всё
-    *x = p2.globX() - pp0.first * scale;
-    *y = p2.globY() - pp0.second * scale;
-    *a = angle;
-    *s = scale;
-}
 
 
 Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Image &_im1, const Image &_im2)
@@ -573,14 +561,25 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
     float avgA = sumA / count;
     float avgS = sumS / count;
 
+    cout<<"avg "<<avgX<<"  "<<avgY<<"  "<<avgA<<"  "<<avgS<<endl;
+
     DrawModel(avgX, avgY, avgA, avgS, _im1, _im2, "C:\\9\\avg.png");
 
 
 
+    //ad
+    vector<pair<KeyPoint, KeyPoint>> dich;
+    dich.emplace_back(vec[0]);
+    dich.emplace_back(vec[1]);
+    dich.emplace_back(vec[2]);
+    dich.emplace_back(vec[3]);
+    dich.emplace_back(vec[4]);
+    dich.emplace_back(vec[5]);
+
+    cout<<"podaem "<<vec.size()<<endl;
 
 
-
-    return Transformation(vec);
+    return Transformation(dich);// Ransac(vec);//
 }
 
 
@@ -591,10 +590,10 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
 int main()
 {
     unsigned int start_time =  clock(); // начальное время
-    QString fileName1 = "C:\\9\\1.png";
+    QString fileName1 = "C:\\9\\small.png";
     shared_ptr<Image> myIm1 = Image::fromFile(fileName1);
 
-    QString fileName2 = "C:\\9\\2.png";
+    QString fileName2 = "C:\\9\\big.png";
     shared_ptr<Image> myIm2 = Image::fromFile(fileName2);
 
 
@@ -614,7 +613,7 @@ int main()
 
     DrawModels(*myIm1, *myIm2, matches, "C:\\9\\temp.png");
     Transformation t = Hough(matches, *myIm1, *myIm2);
-    // Transformation t = Ransac(matches);
+    //Transformation t = Ransac(matches);
 
     DrawPanoramaColor(fileName1, fileName2, t, "C:\\9\\Pan2.png");
 

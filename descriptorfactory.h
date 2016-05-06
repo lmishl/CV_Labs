@@ -2,8 +2,10 @@
 #include "image.h"
 #include "descriptor.h"
 #include "utils.h"
+#include <iostream>
 static const unsigned AnglesBinNum = 36;
 
+using namespace std;
 class DescriptorFactory
 {
 public:
