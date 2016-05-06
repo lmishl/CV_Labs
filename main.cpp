@@ -371,7 +371,7 @@ void DrawModels( const Image &myIm1,  const Image &myIm2, const vector<pair<KeyP
         float x0 = p2.globX() - pp0.first * scale;
         float y0 = p2.globY() - pp0.second * scale;
 
-         painter.drawEllipse(QPoint(y0, x0), 2, 2);
+        painter.drawEllipse(QPoint(y0, x0), 2, 2);
 
 
 
@@ -414,6 +414,29 @@ void DrawModels( const Image &myIm1,  const Image &myIm2, const vector<pair<KeyP
 
 }
 
+void getModelParameters(const pair<KeyPoint, KeyPoint> &match, float *x, float *y, float *a, float *s)
+{
+    KeyPoint p1 = match.first;
+    KeyPoint p2 = match.second;
+
+
+    float scale = p2.sigma / p1.sigma;//pow(2, p2.numberOctave - p1.numberOctave) * ();
+
+    float angle = p2.angle - p1.angle;
+
+    //найдём левый верхний угол образца на 2ой картинке
+
+    //float1 - повернули точку образца на угол angle
+    auto pp0 = rotate(0, 0, p1.globX(), p1.globY(), -angle);
+
+    //2 - найдём начало образца на изобр-и и запишем всё
+    *x = p2.globX() - pp0.first * scale;
+    *y = p2.globY() - pp0.second * scale;
+    *a = angle;
+    *s = scale;
+}
+
+
 Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Image &_im1, const Image &_im2)
 {
     //параметры
@@ -438,23 +461,9 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
     int curList = 0;
     for(uint i = 0; i < _matches.size(); i++)
     {
-        KeyPoint p1 = _matches[i].first;
-        KeyPoint p2 = _matches[i].second;
 
-
-        float scale = p2.sigma / p1.sigma;//pow(2, p2.numberOctave - p1.numberOctave) * ();
-
-        float angle = p2.angle - p1.angle;
-
-        //найдём левый верхний угол образца на 2ой картинке
-
-        //1 - повернули точку образца на угол angle
-        auto pp0 = rotate(0, 0, p1.globX(), p1.globY(), -angle);
-
-        //2 - найдём начало образца на изобр-и
-        float x = p2.globX() - pp0.first * scale;
-        float y = p2.globY() - pp0.second * scale;
-
+        float scale, angle, x, y;
+        getModelParameters(_matches[i], &x, &y, &angle, &scale);
 
         //log_a_(b) =  log_c_(b) / log_c_(a)
 
@@ -503,7 +512,7 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
     int maxSize = votes[0].size();
     for(uint i = 1; i < votes.size(); i++)
     {
-        if(votes[i].size() >= maxSize)
+        if(votes[i].size() > maxSize)
         {
             maxSize = votes[i].size();
             maxVec = i;
@@ -546,6 +555,28 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
     DrawMatches(_im1, _im2, vec, "C:\\9\\votes.png");
     DrawModels(_im1, _im2, vec, "C:\\9\\votesModels.png");
 
+    //а теперь финт ушами: считаем средние параметры и выводим
+    int count = vec.size();
+    float sumX = 0, sumY = 0, sumA = 0, sumS = 0;
+    for(int i = 0; i < count; i ++)
+    {
+        float scale, angle, x, y;
+        getModelParameters(vec[i], &x, &y, &angle, &scale);
+        sumX += x;
+        sumY += y;
+        sumA += angle;
+        sumS += scale;
+    }
+
+    float avgX = sumX / count;
+    float avgY = sumY / count;
+    float avgA = sumA / count;
+    float avgS = sumS / count;
+
+    DrawModel(avgX, avgY, avgA, avgS, _im1, _im2, "C:\\9\\avg.png");
+
+
+
 
 
 
@@ -583,7 +614,7 @@ int main()
 
     DrawModels(*myIm1, *myIm2, matches, "C:\\9\\temp.png");
     Transformation t = Hough(matches, *myIm1, *myIm2);
-   // Transformation t = Ransac(matches);
+    // Transformation t = Ransac(matches);
 
     DrawPanoramaColor(fileName1, fileName2, t, "C:\\9\\Pan2.png");
 
