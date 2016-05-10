@@ -191,15 +191,15 @@ vector<Descriptor> findBlobs(const Image& _im, float T,  const QString &_fileNam
     Pyramid pyr(_im);
     vector<KeyPoint> blobs = pyr.getDOG()->findExtemums();
 
-    for(int i = 0; i < blobs.size(); i++)
-    {
+//    for(int i = 0; i < blobs.size(); i++)
+//    {
 
-        if(pyr.getImage(blobs[i].sigma)->HarrisForPoint(blobs[i]) < T)
-        {
-            blobs.erase(blobs.begin() + i);
-            i--;
-        }
-    }
+//        if(pyr.getImage(blobs[i].sigma)->HarrisForPoint(blobs[i]) < T)
+//        {
+//            blobs.erase(blobs.begin() + i);
+//            i--;
+//        }
+//    }
 
     DrawBlobs(_im, blobs, _fileName);       //рисование
 

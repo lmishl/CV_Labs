@@ -590,32 +590,32 @@ Transformation Hough(const vector<pair<KeyPoint, KeyPoint>> &_matches, const Ima
 int main()
 {
     unsigned int start_time =  clock(); // начальное время
-    QString fileName1 = "C:\\9\\small.png";
+    QString fileName1 = "C:\\curs\\55.jpg";
     shared_ptr<Image> myIm1 = Image::fromFile(fileName1);
 
-    QString fileName2 = "C:\\9\\big.png";
-    shared_ptr<Image> myIm2 = Image::fromFile(fileName2);
+//    QString fileName2 = "C:\\9\\big.png";
+//    shared_ptr<Image> myIm2 = Image::fromFile(fileName2);
 
 
 
-    vector<Descriptor> descs1 = findBlobs(*(myIm1->ot0do1()), 0, "C:\\9\\blob1.tif");
+    vector<Descriptor> descs1 = findBlobs(*(myIm1->ot0do1()), 0, "C:\\curs\\55.png");
     cout<<"blob1  "<< (int)clock() - start_time<<endl;
 
-    vector<Descriptor> descs2 = findBlobs(*(myIm2->ot0do1()), 0, "C:\\9\\blob2.tif");
-    cout<<"blob2  "<< (int)clock() - start_time<<endl;
+//    vector<Descriptor> descs2 = findBlobs(*(myIm2->ot0do1()), 0, "C:\\9\\blob2.tif");
+//    cout<<"blob2  "<< (int)clock() - start_time<<endl;
 
 
 
 
 
-    vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
-    DrawMatches(*myIm1, *myIm2, matches, "C:\\9\\Un.png");
+//    vector<pair<KeyPoint, KeyPoint>> matches = FindMatches(descs1, descs2);
+//    DrawMatches(*myIm1, *myIm2, matches, "C:\\9\\Un.png");
 
-    DrawModels(*myIm1, *myIm2, matches, "C:\\9\\temp.png");
-    Transformation t = Hough(matches, *myIm1, *myIm2);
-    //Transformation t = Ransac(matches);
+//    DrawModels(*myIm1, *myIm2, matches, "C:\\9\\temp.png");
+//    Transformation t = Hough(matches, *myIm1, *myIm2);
+//    //Transformation t = Ransac(matches);
 
-    DrawPanoramaColor(fileName1, fileName2, t, "C:\\9\\Pan2.png");
+//    DrawPanoramaColor(fileName1, fileName2, t, "C:\\9\\Pan2.png");
 
     unsigned int search_time = (int)clock() - start_time; // искомое время
     cout<<"\ngood "<< search_time<<endl;
